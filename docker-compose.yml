@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: campusquest_db
+    environment:
+      POSTGRES_DB: campusquest_db
+      POSTGRES_USER: campusquest_user
+      POSTGRES_PASSWORD: campusquest_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campusquest_user -d campusquest_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - campusquest_network
+
+  # Service A: Fitness-Sync (Member A)
+  fitness-sync:
+    build: ./services/fitness-sync-service
+    container_name: campusquest_fitness
+    environment:
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: campusquest_db
+      DB_USER: campusquest_user
+      DB_PASSWORD: campusquest_pass
+      NODE_ENV: production
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - campusquest_network
+    restart: unless-stopped
+
+  # Service B: Merchant-Stall (Member B)
+  merchant-stall:
+    build: ./services/merchant-stall-service
+    container_name: campusquest_merchant
+    environment:
+      PORT: 3002
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: campusquest_db
+      DB_USER: campusquest_user
+      DB_PASSWORD: campusquest_pass
+      NODE_ENV: production
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3002/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - campusquest_network
+    restart: unless-stopped
+
+  # Service C: Geo-Location (Member C)
+  geolocation:
+    build: ./services/geolocation-service
+    container_name: campusquest_geo
+    environment:
+      PORT: 3003
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: campusquest_db
+      DB_USER: campusquest_user
+      DB_PASSWORD: campusquest_pass
+      NODE_ENV: production
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3003/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - campusquest_network
+    restart: unless-stopped
+
+  # Service D: Rewards-Store (Member D)
+  rewards-store:
+    build: ./services/rewards-store-service
+    container_name: campusquest_rewards
+    environment:
+      PORT: 3004
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: campusquest_db
+      DB_USER: campusquest_user
+      DB_PASSWORD: campusquest_pass
+      NODE_ENV: production
+    ports:
+      - "3004:3004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3004/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - campusquest_network
+    restart: unless-stopped
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: campusquest_frontend
+    environment:
+      REACT_APP_FITNESS_URL: http://localhost:3001
+      REACT_APP_MERCHANT_URL: http://localhost:3002
+      REACT_APP_GEO_URL: http://localhost:3003
+      REACT_APP_REWARDS_URL: http://localhost:3004
+    ports:
+      - "3000:80"
+    depends_on:
+      - fitness-sync
+      - merchant-stall
+      - geolocation
+      - rewards-store
+    networks:
+      - campusquest_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  campusquest_network:
+    driver: bridge
