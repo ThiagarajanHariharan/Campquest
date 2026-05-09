@@ -19,6 +19,12 @@ const pool = new Pool({
 });
 
 // ============================================================
+// Utilities
+// ============================================================
+const toNullable = (val) => (val !== undefined && val !== null && val !== '') ? val : null;
+const coalesce = (val, fallback) => (val !== undefined ? val : fallback);
+
+// ============================================================
 // Middleware
 // ============================================================
 app.use(cors());
@@ -112,7 +118,7 @@ app.post('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO menu_items (canteen_id, name, description, price, calories)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [canteenId, name, description || null, price, calories || null]
+      [canteenId, name, toNullable(description), price, toNullable(calories)]
     );
     res.status(201).json({ message: 'Menu item created!', item: result.rows[0] });
   } catch (err) {
@@ -141,11 +147,11 @@ app.put('/api/merchant/menu/:menuItemId', async (req, res) => {
          name = $1, description = $2, price = $3, calories = $4, is_available = $5, updated_at = NOW()
        WHERE id = $6 RETURNING *`,
       [
-        name !== undefined ? name : item.name,
-        description !== undefined ? description : item.description,
-        price !== undefined ? price : item.price,
-        calories !== undefined ? calories : item.calories,
-        is_available !== undefined ? is_available : item.is_available,
+        coalesce(name, item.name),
+        coalesce(description, item.description),
+        coalesce(price, item.price),
+        coalesce(calories, item.calories),
+        coalesce(is_available, item.is_available),
         menuItemId
       ]
     );
