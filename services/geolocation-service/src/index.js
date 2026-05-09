@@ -21,7 +21,10 @@ const pool = new Pool({
 // ============================================================
 // Middleware
 // ============================================================
-app.use(cors());
+const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
+app.use(cors({
+  origin: allowedOrigin
+}));
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`[Geo-Location] ${req.method} ${req.path} - ${new Date().toISOString()}`);
