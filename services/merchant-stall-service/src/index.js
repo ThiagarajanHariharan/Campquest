@@ -102,6 +102,9 @@ app.post('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
   if (price < 0) {
     return res.status(400).json({ error: 'Price cannot be negative' });
   }
+  if (calories !== undefined && calories < 0) {
+    return res.status(400).json({ error: 'Calories cannot be negative' });
+  }
 
   try {
     const canteenResult = await pool.query('SELECT id FROM canteens WHERE id = $1', [canteenId]);
@@ -128,6 +131,10 @@ app.post('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
 app.put('/api/merchant/menu/:menuItemId', async (req, res) => {
   const { menuItemId } = req.params;
   const { name, description, price, calories, is_available } = req.body;
+
+  if (calories !== undefined && calories < 0) {
+    return res.status(400).json({ error: 'Calories cannot be negative' });
+  }
 
   try {
     const current = await pool.query('SELECT * FROM menu_items WHERE id = $1', [menuItemId]);
