@@ -126,20 +126,11 @@ app.get('/api/rewards/user/:userId/transactions', async (req, res) => {
   }
 });
 
-// ============================================================
-// POST /api/rewards/claim
-// Claim merchandise using quest points (transaction-safe!)
-// ============================================================
-app.post('/api/rewards/claim', async (req, res) => {
-  const { user_id, merchandise_id, quantity = 1 } = req.body;
-
-  if (!user_id || !merchandise_id) {
-    return res.status(400).json({ error: 'Missing required fields: user_id, merchandise_id' });
-  }
-  if (quantity < 1) {
-    return res.status(400).json({ error: 'Quantity must be at least 1' });
-  }
-
+/**
+ * Processes a merchandise claim transaction.
+ * Extracted to improve modularity and testability.
+ */
+async function processClaimTransaction(user_id, merchandise_id, quantity) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -152,7 +143,7 @@ app.post('/api/rewards/claim', async (req, res) => {
 
     if (merchResult.rows.length === 0) {
       await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'Merchandise not found or unavailable' });
+      return { status: 404, data: { error: 'Merchandise not found or unavailable' } };
     }
 
     const item = merchResult.rows[0];
@@ -161,11 +152,14 @@ app.post('/api/rewards/claim', async (req, res) => {
     // Check stock
     if (item.stock_quantity < quantity) {
       await client.query('ROLLBACK');
-      return res.status(400).json({
-        error: 'Insufficient stock',
-        available: item.stock_quantity,
-        requested: quantity
-      });
+      return {
+        status: 400,
+        data: {
+          error: 'Insufficient stock',
+          available: item.stock_quantity,
+          requested: quantity
+        }
+      };
     }
 
     // Lock user row to prevent race conditions on points
@@ -176,7 +170,7 @@ app.post('/api/rewards/claim', async (req, res) => {
 
     if (userResult.rows.length === 0) {
       await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'User not found' });
+      return { status: 404, data: { error: 'User not found' } };
     }
 
     const user = userResult.rows[0];
@@ -184,12 +178,15 @@ app.post('/api/rewards/claim', async (req, res) => {
     // Check user has enough points
     if (user.quest_points < totalCost) {
       await client.query('ROLLBACK');
-      return res.status(400).json({
-        error: 'Insufficient quest points',
-        required: totalCost,
-        available: user.quest_points,
-        shortfall: totalCost - user.quest_points
-      });
+      return {
+        status: 400,
+        data: {
+          error: 'Insufficient quest points',
+          required: totalCost,
+          available: user.quest_points,
+          shortfall: totalCost - user.quest_points
+        }
+      };
     }
 
     // Deduct points from user
@@ -213,20 +210,41 @@ app.post('/api/rewards/claim', async (req, res) => {
 
     await client.query('COMMIT');
 
-    res.status(201).json({
-      message: `Successfully claimed ${quantity}x ${item.name}! 🎉`,
-      transaction: transactionResult.rows[0],
-      item_claimed: item,
-      points_spent: totalCost,
-      remaining_points: updatedUserResult.rows[0].quest_points
-    });
+    return {
+      status: 201,
+      data: {
+        message: `Successfully claimed ${quantity}x ${item.name}! 🎉`,
+        transaction: transactionResult.rows[0],
+        item_claimed: item,
+        points_spent: totalCost,
+        remaining_points: updatedUserResult.rows[0].quest_points
+      }
+    };
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error claiming merchandise:', err);
-    res.status(500).json({ error: 'Failed to claim merchandise', details: err.message });
+    return { status: 500, data: { error: 'Failed to claim merchandise', details: err.message } };
   } finally {
     client.release();
   }
+}
+
+// ============================================================
+// POST /api/rewards/claim
+// Claim merchandise using quest points (transaction-safe!)
+// ============================================================
+app.post('/api/rewards/claim', async (req, res) => {
+  const { user_id, merchandise_id, quantity = 1 } = req.body;
+
+  if (!user_id || !merchandise_id) {
+    return res.status(400).json({ error: 'Missing required fields: user_id, merchandise_id' });
+  }
+  if (quantity < 1) {
+    return res.status(400).json({ error: 'Quantity must be at least 1' });
+  }
+
+  const result = await processClaimTransaction(user_id, merchandise_id, quantity);
+  return res.status(result.status).json(result.data);
 });
 
 // ============================================================
