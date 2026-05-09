@@ -91,10 +91,13 @@ app.post('/api/geo/check-location', async (req, res) => {
 
     // Find canteens within the 50m radius using Haversine
     const nearbyCanteens = [];
+    const userLat = parseFloat(latitude);
+    const userLon = parseFloat(longitude);
+
     for (const canteen of canteensResult.rows) {
       const distance = haversineDistance(
-        parseFloat(latitude),
-        parseFloat(longitude),
+        userLat,
+        userLon,
         parseFloat(canteen.latitude),
         parseFloat(canteen.longitude)
       );
