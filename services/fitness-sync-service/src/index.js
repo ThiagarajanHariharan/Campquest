@@ -22,7 +22,7 @@ const pool = new Pool({
 // ============================================================
 // Middleware
 // ============================================================
-app.use(cors());
+app.use(cors({ origin: process.env.ALLOWED_ORIGIN || 'http://localhost:3000' }));
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`[Fitness-Sync] ${req.method} ${req.path} - ${new Date().toISOString()}`);
