@@ -19,6 +19,12 @@ const pool = new Pool({
 });
 
 // ============================================================
+// Utilities
+// ============================================================
+const toNullable = (val) => (val !== undefined && val !== null && val !== '') ? val : null;
+const coalesce = (val, fallback) => (val !== undefined ? val : fallback);
+
+// ============================================================
 // Middleware
 // ============================================================
 app.use(cors());
@@ -244,7 +250,7 @@ app.post('/api/rewards/merchandise', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO merchandise (name, description, cost_in_points, stock_quantity, category)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [name, description || null, cost_in_points, stock_quantity, category || 'general']
+      [name, toNullable(description), cost_in_points, stock_quantity, category || 'general']
     );
     res.status(201).json({ message: 'Merchandise created!', item: result.rows[0] });
   } catch (err) {
@@ -274,12 +280,12 @@ app.put('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
          is_available = $5, category = $6, updated_at = NOW()
        WHERE id = $7 RETURNING *`,
       [
-        name !== undefined ? name : item.name,
-        description !== undefined ? description : item.description,
-        cost_in_points !== undefined ? cost_in_points : item.cost_in_points,
-        stock_quantity !== undefined ? stock_quantity : item.stock_quantity,
-        is_available !== undefined ? is_available : item.is_available,
-        category !== undefined ? category : item.category,
+        coalesce(name, item.name),
+        coalesce(description, item.description),
+        coalesce(cost_in_points, item.cost_in_points),
+        coalesce(stock_quantity, item.stock_quantity),
+        coalesce(is_available, item.is_available),
+        coalesce(category, item.category),
         merchandiseId
       ]
     );
