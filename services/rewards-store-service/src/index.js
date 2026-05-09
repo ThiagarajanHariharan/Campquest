@@ -21,7 +21,17 @@ const pool = new Pool({
 // ============================================================
 // Middleware
 // ============================================================
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGIN ? process.env.ALLOWED_ORIGIN.split(',') : ['http://localhost:3000'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`[Rewards-Store] ${req.method} ${req.path} - ${new Date().toISOString()}`);
@@ -293,9 +303,12 @@ app.put('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
 // ============================================================
 // Start Server
 // ============================================================
-const server = app.listen(PORT, () => {
-  console.log(`✅ Rewards-Store Service running on port ${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
-});
+let server;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`✅ Rewards-Store Service running on port ${PORT}`);
+    console.log(`   Health: http://localhost:${PORT}/health`);
+  });
+}
 
 module.exports = { app, server, pool };
