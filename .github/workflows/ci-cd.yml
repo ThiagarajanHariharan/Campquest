@@ -9,6 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ============================================================
@@ -28,7 +29,7 @@ jobs:
           cache-dependency-path: services/fitness-sync-service/package.json
 
       - name: Install fitness-sync dependencies
-        run: npm ci
+        run: npm install
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
@@ -164,11 +165,18 @@ jobs:
 
       - name: Start services
         run: |
-          cd services/fitness-sync-service && npm ci && PORT=3001 DB_HOST=localhost node src/index.js &
-          cd services/merchant-stall-service && npm ci && PORT=3002 DB_HOST=localhost node src/index.js &
-          cd services/geolocation-service && npm ci && PORT=3003 DB_HOST=localhost node src/index.js &
-          cd services/rewards-store-service && npm ci && PORT=3004 DB_HOST=localhost node src/index.js &
-          sleep 10
+          cd services/fitness-sync-service && npm install
+          cd ../merchant-stall-service && npm install
+          cd ../geolocation-service && npm install
+          cd ../rewards-store-service && npm install
+          cd ../..
+
+          (cd services/fitness-sync-service && PORT=3001 DB_HOST=localhost node src/index.js) &
+          (cd services/merchant-stall-service && PORT=3002 DB_HOST=localhost node src/index.js) &
+          (cd services/geolocation-service && PORT=3003 DB_HOST=localhost node src/index.js) &
+          (cd services/rewards-store-service && PORT=3004 DB_HOST=localhost node src/index.js) &
+
+          sleep 15
         env:
           DB_HOST: localhost
           DB_USER: campusquest_user
@@ -184,7 +192,7 @@ jobs:
           echo "✅ All services healthy"
 
       - name: Install test dependencies
-        run: npm ci
+        run: npm install
         working-directory: integration-tests
 
       - name: Run integration tests

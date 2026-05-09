@@ -128,3 +128,14 @@ describe('Points Accumulation', () => {
     expect(points).toBeLessThanOrEqual(0);
   });
 });
+
+describe('Server Cleanup', () => {
+  const { server, pool } = require('../src/index');
+  afterAll((done) => {
+    server.close(() => {
+      pool.end();
+      done();
+    });
+  });
+  test('dummy', () => expect(true).toBe(true));
+});
