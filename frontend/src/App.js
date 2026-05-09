@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './App.css';
 
 // ─── Service URLs ────────────────────────────────────────────
@@ -384,7 +384,7 @@ function StudentApp({ user, onLogout }) {
   const totalMiles   = parseFloat(userData?.stats?.total_miles  || 0).toFixed(1);
   const totalActs    = userData?.stats?.total_activities ?? 0;
   const bonusPts     = burned > ingested ? Math.round((burned - ingested) / 10) : 0;
-  const myRank       = leaderboard.find(u => u.id === user.id);
+  const myRank       = useMemo(() => leaderboard.find(u => u.id === user.id), [leaderboard, user.id]);
 
   return (
     <div className="app">
