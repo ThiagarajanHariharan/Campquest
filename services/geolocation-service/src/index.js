@@ -68,6 +68,49 @@ app.get('/health', async (req, res) => {
   }
 });
 
+function isValidCoordinates(latitude, longitude) {
+  return !(latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180);
+}
+
+function getNearbyCanteens(canteens, latitude, longitude, radius) {
+  const nearby = [];
+  for (const canteen of canteens) {
+    const distance = haversineDistance(
+      parseFloat(latitude),
+      parseFloat(longitude),
+      parseFloat(canteen.latitude),
+      parseFloat(canteen.longitude)
+    );
+
+    if (distance <= radius) {
+      nearby.push({ ...canteen, distance_meters: Math.round(distance) });
+    }
+  }
+  return nearby.sort((a, b) => a.distance_meters - b.distance_meters);
+}
+
+function buildLocationResponse(isWithinRange, latitude, longitude, radius, nearbyCanteens, closestCanteen = null, menu = []) {
+  if (!isWithinRange) {
+    return {
+      within_range: false,
+      message: 'You are not near any canteen. Walk closer to see the menu!',
+      user_location: { latitude, longitude },
+      geofence_radius: radius,
+      nearby_canteens: nearbyCanteens
+    };
+  }
+
+  return {
+    within_range: true,
+    message: `You're near ${closestCanteen.name}! Here's the menu:`,
+    user_location: { latitude, longitude },
+    geofence_radius: radius,
+    nearest_canteen: closestCanteen,
+    menu: menu,
+    all_nearby_canteens: nearbyCanteens
+  };
+}
+
 // ============================================================
 // POST /api/geo/check-location
 // Check user location against canteen coordinates (50m radius)
@@ -79,7 +122,7 @@ app.post('/api/geo/check-location', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields: user_id, latitude, longitude' });
   }
 
-  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+  if (!isValidCoordinates(latitude, longitude)) {
     return res.status(400).json({ error: 'Invalid coordinates' });
   }
 
@@ -90,24 +133,10 @@ app.post('/api/geo/check-location', async (req, res) => {
     );
 
     // Find canteens within the 50m radius using Haversine
-    const nearbyCanteens = [];
-    for (const canteen of canteensResult.rows) {
-      const distance = haversineDistance(
-        parseFloat(latitude),
-        parseFloat(longitude),
-        parseFloat(canteen.latitude),
-        parseFloat(canteen.longitude)
-      );
-
-      if (distance <= GEOFENCE_RADIUS_METERS) {
-        nearbyCanteens.push({ ...canteen, distance_meters: Math.round(distance) });
-      }
-    }
+    const nearbyCanteens = getNearbyCanteens(canteensResult.rows, latitude, longitude, GEOFENCE_RADIUS_METERS);
 
     // Log this location check
-    const nearestCanteen = nearbyCanteens.length > 0
-      ? nearbyCanteens.sort((a, b) => a.distance_meters - b.distance_meters)[0]
-      : null;
+    const nearestCanteen = nearbyCanteens.length > 0 ? nearbyCanteens[0] : null;
 
     await pool.query(
       `INSERT INTO user_locations (user_id, latitude, longitude, nearby_canteen_id)
@@ -116,31 +145,16 @@ app.post('/api/geo/check-location', async (req, res) => {
     );
 
     if (nearbyCanteens.length === 0) {
-      return res.json({
-        within_range: false,
-        message: 'You are not near any canteen. Walk closer to see the menu!',
-        user_location: { latitude, longitude },
-        geofence_radius: GEOFENCE_RADIUS_METERS,
-        nearby_canteens: []
-      });
+      return res.json(buildLocationResponse(false, latitude, longitude, GEOFENCE_RADIUS_METERS, []));
     }
 
     // Fetch the menu for the nearest canteen
-    const closestCanteen = nearbyCanteens.sort((a, b) => a.distance_meters - b.distance_meters)[0];
     const menuResult = await pool.query(
       `SELECT * FROM menu_items WHERE canteen_id = $1 AND is_available = true ORDER BY name`,
-      [closestCanteen.id]
+      [nearestCanteen.id]
     );
 
-    res.json({
-      within_range: true,
-      message: `You're near ${closestCanteen.name}! Here's the menu:`,
-      user_location: { latitude, longitude },
-      geofence_radius: GEOFENCE_RADIUS_METERS,
-      nearest_canteen: closestCanteen,
-      menu: menuResult.rows,
-      all_nearby_canteens: nearbyCanteens
-    });
+    res.json(buildLocationResponse(true, latitude, longitude, GEOFENCE_RADIUS_METERS, nearbyCanteens, nearestCanteen, menuResult.rows));
   } catch (err) {
     console.error('Error checking location:', err);
     res.status(500).json({ error: 'Failed to check location', details: err.message });
