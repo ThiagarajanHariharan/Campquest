@@ -116,6 +116,8 @@ describe('🍜 Merchant-Stall CRUD Tests', () => {
       description: 'Automated test menu item',
       price: 4.50,
       calories: 500
+    }, {
+      headers: { 'Authorization': `Bearer ${process.env.MERCHANT_API_KEY || 'test-merchant-secret'}` }
     });
     expect(res.status).toBe(201);
     expect(res.data.item).toBeDefined();
@@ -133,6 +135,8 @@ describe('🍜 Merchant-Stall CRUD Tests', () => {
     const res = await axios.put(`${MERCHANT_URL}/api/merchant/menu/${menuItemId}`, {
       name: 'Updated Test Dish',
       price: 5.00
+    }, {
+      headers: { 'Authorization': `Bearer ${process.env.MERCHANT_API_KEY || 'test-merchant-secret'}` }
     });
     expect(res.status).toBe(200);
     expect(res.data.item.name).toBe('Updated Test Dish');
@@ -148,7 +152,9 @@ describe('🍜 Merchant-Stall CRUD Tests', () => {
   });
 
   test('should DELETE/hide a menu item (CRUD - Delete)', async () => {
-    const res = await axios.delete(`${MERCHANT_URL}/api/merchant/menu/${menuItemId}`);
+    const res = await axios.delete(`${MERCHANT_URL}/api/merchant/menu/${menuItemId}`, {
+      headers: { 'Authorization': `Bearer ${process.env.MERCHANT_API_KEY || 'test-merchant-secret'}` }
+    });
     expect(res.status).toBe(200);
     expect(res.data.item.is_available).toBe(false);
   });

@@ -28,6 +28,22 @@ app.use((req, res, next) => {
   next();
 });
 
+const requireMerchantRole = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  const expectedToken = process.env.MERCHANT_API_KEY;
+
+  if (!expectedToken) {
+    console.error('MERCHANT_API_KEY is not configured on the server');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
+  if (!token || token !== expectedToken) {
+    return res.status(401).json({ error: 'Unauthorized: Merchant access required' });
+  }
+  next();
+};
+
 // ============================================================
 // Health Check
 // ============================================================
@@ -92,7 +108,7 @@ app.get('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
 // POST /api/merchant/canteen/:canteenId/menu
 // CREATE a new menu item (CRUD - Create)
 // ============================================================
-app.post('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
+app.post('/api/merchant/canteen/:canteenId/menu', requireMerchantRole, async (req, res) => {
   const { canteenId } = req.params;
   const { name, description, price, calories } = req.body;
 
@@ -125,7 +141,7 @@ app.post('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
 // PUT /api/merchant/menu/:menuItemId
 // UPDATE an existing menu item (CRUD - Update)
 // ============================================================
-app.put('/api/merchant/menu/:menuItemId', async (req, res) => {
+app.put('/api/merchant/menu/:menuItemId', requireMerchantRole, async (req, res) => {
   const { menuItemId } = req.params;
   const { name, description, price, calories, is_available } = req.body;
 
@@ -160,7 +176,7 @@ app.put('/api/merchant/menu/:menuItemId', async (req, res) => {
 // DELETE /api/merchant/menu/:menuItemId
 // DELETE a menu item (CRUD - Delete / soft delete)
 // ============================================================
-app.delete('/api/merchant/menu/:menuItemId', async (req, res) => {
+app.delete('/api/merchant/menu/:menuItemId', requireMerchantRole, async (req, res) => {
   const { menuItemId } = req.params;
   try {
     const result = await pool.query(
