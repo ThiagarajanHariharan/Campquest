@@ -35,12 +35,40 @@ jobs:
         run: npm test -- --ci --passWithNoTests
         working-directory: services/fitness-sync-service
 
+      - name: Install merchant-stall dependencies
+        run: npm ci
+        working-directory: services/merchant-stall-service
+
+      - name: Run merchant-stall unit tests
+        run: npm test -- --ci --passWithNoTests
+        working-directory: services/merchant-stall-service
+
+      - name: Install geolocation dependencies
+        run: npm ci
+        working-directory: services/geolocation-service
+
+      - name: Run geolocation unit tests
+        run: npm test -- --ci --passWithNoTests
+        working-directory: services/geolocation-service
+
+      - name: Install rewards-store dependencies
+        run: npm ci
+        working-directory: services/rewards-store-service
+
+      - name: Run rewards-store unit tests
+        run: npm test -- --ci --passWithNoTests
+        working-directory: services/rewards-store-service
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: fitness-coverage
-          path: services/fitness-sync-service/coverage/
+          name: coverage-reports
+          path: |
+            services/fitness-sync-service/coverage/
+            services/merchant-stall-service/coverage/
+            services/geolocation-service/coverage/
+            services/rewards-store-service/coverage/
 
   # ============================================================
   # Stage 2: Security Scanning (Member B responsibility)
