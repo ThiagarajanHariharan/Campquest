@@ -27,7 +27,9 @@ function getMealContext() {
 // ─── API helper ───────────────────────────────────────────────
 async function api(url, opts = {}) {
   try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+    const defaultHeaders = { 'Content-Type': 'application/json' };
+    const mergedHeaders = { ...defaultHeaders, ...(opts.headers || {}) };
+    const r = await fetch(url, { ...opts, headers: mergedHeaders });
     return await r.json();
   } catch { return { error: 'Service unreachable' }; }
 }
@@ -373,11 +375,39 @@ function StudentApp({ user, onLogout }) {
   };
 
   const claimReward = async (merchId) => {
-    const data = await api(`${REWARDS_URL}/api/rewards/claim`, {
-      method: 'POST', body: JSON.stringify({ user_id: user.id, merchandise_id: merchId, quantity: 1 })
-    });
-    if (data.message) { showToast(data.message); api(`${FITNESS_URL}/api/fitness/user/${user.id}`).then(d => { if (d.user) setUserData(d); }); }
-    else showToast(data.error || 'Claim failed', 'error');
+    try {
+      const tokenRes = await fetch(`${REWARDS_URL}/api/rewards/generate-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id })
+      });
+      const tokenData = await tokenRes.json();
+
+      if (!tokenData.token) {
+        showToast('Failed to acquire token', 'error');
+        return;
+      }
+
+      const data = await api(`${REWARDS_URL}/api/rewards/claim`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenData.token}`
+        },
+        body: JSON.stringify({ user_id: user.id, merchandise_id: merchId, quantity: 1 })
+      });
+
+      if (data.message) {
+        showToast(data.message);
+        api(`${FITNESS_URL}/api/fitness/user/${user.id}`).then(d => {
+          if (d.user) setUserData(d);
+        });
+      } else {
+        showToast(data.error || 'Claim failed', 'error');
+      }
+    } catch (err) {
+      showToast('Network error during claim', 'error');
+    }
   };
 
   const questPoints  = userData?.user?.quest_points ?? 0;

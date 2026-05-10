@@ -1,9 +1,30 @@
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
+
+const JWT_SECRET = process.env.JWT_SECRET || 'campusquest-secret';
+
+// ============================================================
+// Token Authentication Middleware
+// ============================================================
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.status(401).json({ error: 'Authentication required' });
+
+  try {
+    const user = jwt.verify(token, JWT_SECRET);
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+};
 
 // ============================================================
 // Database Connection
@@ -127,10 +148,23 @@ app.get('/api/rewards/user/:userId/transactions', async (req, res) => {
 });
 
 // ============================================================
+// POST /api/rewards/generate-token
+// Generate a token for a user
+// ============================================================
+app.post('/api/rewards/generate-token', (req, res) => {
+  const { user_id } = req.body;
+  if (!user_id) {
+    return res.status(400).json({ error: 'Missing required field: user_id' });
+  }
+  const token = jwt.sign({ id: user_id }, JWT_SECRET, { expiresIn: '1h' });
+  res.json({ token });
+});
+
+// ============================================================
 // POST /api/rewards/claim
 // Claim merchandise using quest points (transaction-safe!)
 // ============================================================
-app.post('/api/rewards/claim', async (req, res) => {
+app.post('/api/rewards/claim', authenticateToken, async (req, res) => {
   const { user_id, merchandise_id, quantity = 1 } = req.body;
 
   if (!user_id || !merchandise_id) {
@@ -138,6 +172,10 @@ app.post('/api/rewards/claim', async (req, res) => {
   }
   if (quantity < 1) {
     return res.status(400).json({ error: 'Quantity must be at least 1' });
+  }
+
+  if (req.user.id !== user_id) {
+    return res.status(403).json({ error: 'Unauthorized: cannot claim for another user' });
   }
 
   const client = await pool.connect();
