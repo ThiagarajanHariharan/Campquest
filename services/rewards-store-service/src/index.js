@@ -148,16 +148,47 @@ app.get('/api/rewards/user/:userId/transactions', async (req, res) => {
 });
 
 // ============================================================
-// POST /api/rewards/generate-token
-// Generate a token for a user
+// POST /api/rewards/login
+// Verify credentials and return a token
 // ============================================================
-app.post('/api/rewards/generate-token', (req, res) => {
-  const { user_id } = req.body;
-  if (!user_id) {
-    return res.status(400).json({ error: 'Missing required field: user_id' });
+app.post('/api/rewards/login', async (req, res) => {
+  const { username, password_hash } = req.body;
+  if (!username || !password_hash) {
+    return res.status(400).json({ error: 'Missing required fields: username, password_hash' });
   }
-  const token = jwt.sign({ id: user_id }, JWT_SECRET, { expiresIn: '1h' });
-  res.json({ token });
+  try {
+    const result = await pool.query(
+      `SELECT id, username, role FROM users WHERE username = $1 AND password_hash = $2`,
+      [username, password_hash]
+    );
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    const user = result.rows[0];
+    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token, user });
+  } catch (err) {
+    console.error('Error during login:', err);
+    // Suppress errors about missing 'role' column if the schema doesn't have it
+    if (err.code === '42703' && err.message.includes('column "role" does not exist')) {
+       try {
+         const resultFallback = await pool.query(
+           `SELECT id, username FROM users WHERE username = $1 AND password_hash = $2`,
+           [username, password_hash]
+         );
+         if (resultFallback.rows.length === 0) {
+           return res.status(401).json({ error: 'Invalid credentials' });
+         }
+         const user = resultFallback.rows[0];
+         const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+         res.json({ token, user });
+       } catch (fallbackErr) {
+         res.status(500).json({ error: 'Internal server error', details: fallbackErr.message });
+       }
+    } else {
+       res.status(500).json({ error: 'Internal server error', details: err.message });
+    }
+  }
 });
 
 // ============================================================

@@ -225,7 +225,7 @@ describe('🎁 Rewards-Store Tests', () => {
     const merch = await axios.get(`${REWARDS_URL}/api/rewards/merchandise`);
     const cheapest = merch.data.merchandise.sort((a, b) => a.cost_in_points - b.cost_in_points)[0];
 
-    const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/generate-token`, { user_id: 1 });
+    const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/login`, { username: 'student_alex', password_hash: '$2b$10$samplehash1' });
     const token = tokenRes.data.token;
 
     const res = await axios.post(`${REWARDS_URL}/api/rewards/claim`, {
@@ -250,7 +250,7 @@ describe('🎁 Rewards-Store Tests', () => {
     const expensive = merch.data.merchandise.sort((a, b) => b.cost_in_points - a.cost_in_points)[0];
 
     try {
-      const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/generate-token`, { user_id: newUser.data.user.id });
+      const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/login`, { username: newUser.data.user.username, password_hash: 'hash' });
       const token = tokenRes.data.token;
 
       await axios.post(`${REWARDS_URL}/api/rewards/claim`, {
@@ -308,7 +308,7 @@ describe('🔄 End-to-End User Journey', () => {
     const merch = await axios.get(`${REWARDS_URL}/api/rewards/merchandise`);
     const affordable = merch.data.merchandise.find(m => m.cost_in_points <= 800);
     if (affordable) {
-      const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/generate-token`, { user_id: userId });
+      const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/login`, { username: userRes.data.user.username, password_hash: 'e2ehash' });
       const token = tokenRes.data.token;
 
       const claimRes = await axios.post(`${REWARDS_URL}/api/rewards/claim`, {
