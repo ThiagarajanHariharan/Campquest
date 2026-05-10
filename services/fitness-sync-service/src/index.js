@@ -231,9 +231,15 @@ app.get('/api/fitness/activities', async (req, res) => {
 // ============================================================
 // Start Server
 // ============================================================
-const server = app.listen(PORT, () => {
-  console.log(`✅ Fitness-Sync Service running on port ${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
-});
+let server;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`✅ Fitness-Sync Service running on port ${PORT}`);
+    console.log(`   Health: http://localhost:${PORT}/health`);
+  });
+}
 
-module.exports = { app, server, pool };
+// Extract core logic for tests
+const calculatePoints = (miles) => Math.round(miles * 10);
+
+module.exports = { app, server, pool, calculatePoints };
