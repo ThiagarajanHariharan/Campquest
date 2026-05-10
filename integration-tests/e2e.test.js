@@ -225,10 +225,15 @@ describe('🎁 Rewards-Store Tests', () => {
     const merch = await axios.get(`${REWARDS_URL}/api/rewards/merchandise`);
     const cheapest = merch.data.merchandise.sort((a, b) => a.cost_in_points - b.cost_in_points)[0];
 
+    const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/login`, { username: 'student_alex', password_hash: '$2b$10$samplehash1' });
+    const token = tokenRes.data.token;
+
     const res = await axios.post(`${REWARDS_URL}/api/rewards/claim`, {
       user_id: 1,
       merchandise_id: cheapest.id,
       quantity: 1
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
     });
     expect(res.status).toBe(201);
     expect(res.data.points_spent).toBe(cheapest.cost_in_points);
@@ -245,10 +250,15 @@ describe('🎁 Rewards-Store Tests', () => {
     const expensive = merch.data.merchandise.sort((a, b) => b.cost_in_points - a.cost_in_points)[0];
 
     try {
+      const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/login`, { username: newUser.data.user.username, password_hash: 'hash' });
+      const token = tokenRes.data.token;
+
       await axios.post(`${REWARDS_URL}/api/rewards/claim`, {
         user_id: newUser.data.user.id,
         merchandise_id: expensive.id,
         quantity: 1
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {
       expect(err.response.status).toBe(400);
@@ -298,10 +308,15 @@ describe('🔄 End-to-End User Journey', () => {
     const merch = await axios.get(`${REWARDS_URL}/api/rewards/merchandise`);
     const affordable = merch.data.merchandise.find(m => m.cost_in_points <= 800);
     if (affordable) {
+      const tokenRes = await axios.post(`${REWARDS_URL}/api/rewards/login`, { username: userRes.data.user.username, password_hash: 'e2ehash' });
+      const token = tokenRes.data.token;
+
       const claimRes = await axios.post(`${REWARDS_URL}/api/rewards/claim`, {
         user_id: userId,
         merchandise_id: affordable.id,
         quantity: 1
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       expect(claimRes.status).toBe(201);
       expect(claimRes.data.remaining_points).toBe(800 - affordable.cost_in_points);

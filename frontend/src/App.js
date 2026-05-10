@@ -27,7 +27,9 @@ function getMealContext() {
 // ─── API helper ───────────────────────────────────────────────
 async function api(url, opts = {}) {
   try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+    const defaultHeaders = { 'Content-Type': 'application/json' };
+    const mergedHeaders = { ...defaultHeaders, ...(opts.headers || {}) };
+    const r = await fetch(url, { ...opts, headers: mergedHeaders });
     return await r.json();
   } catch { return { error: 'Service unreachable' }; }
 }
@@ -373,11 +375,33 @@ function StudentApp({ user, onLogout }) {
   };
 
   const claimReward = async (merchId) => {
-    const data = await api(`${REWARDS_URL}/api/rewards/claim`, {
-      method: 'POST', body: JSON.stringify({ user_id: user.id, merchandise_id: merchId, quantity: 1 })
-    });
-    if (data.message) { showToast(data.message); api(`${FITNESS_URL}/api/fitness/user/${user.id}`).then(d => { if (d.user) setUserData(d); }); }
-    else showToast(data.error || 'Claim failed', 'error');
+    try {
+      const token = localStorage.getItem('cq_token');
+      if (!token) {
+        showToast('Authentication required', 'error');
+        return;
+      }
+
+      const data = await api(`${REWARDS_URL}/api/rewards/claim`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ user_id: user.id, merchandise_id: merchId, quantity: 1 })
+      });
+
+      if (data.message) {
+        showToast(data.message);
+        api(`${FITNESS_URL}/api/fitness/user/${user.id}`).then(d => {
+          if (d.user) setUserData(d);
+        });
+      } else {
+        showToast(data.error || 'Claim failed', 'error');
+      }
+    } catch (err) {
+      showToast('Network error during claim', 'error');
+    }
   };
 
   const questPoints  = userData?.user?.quest_points ?? 0;
@@ -585,8 +609,38 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem('cq_user')); } catch { return null; }
   });
 
-  const handleLogin  = (u) => { localStorage.setItem('cq_user', JSON.stringify(u)); setCurrentUser(u); };
-  const handleLogout = ()  => { localStorage.removeItem('cq_user'); setCurrentUser(null); };
+  const handleLogin  = async (u) => {
+    try {
+      // Mock user password verification flow
+      // To properly connect the mock data, we just assume password = user.password (handled in LoginScreen)
+      // but we still need the actual token from our backend.
+      // Because DEMO_USERS in LoginScreen use fixed passwords, we fetch token:
+      const res = await fetch(`${REWARDS_URL}/api/rewards/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u.username, password_hash: u.password })
+      });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('cq_token', data.token);
+      } else {
+        // Fallback for demo users that might not exist in the seeded DB
+        // If it fails, generate a mock token for local testing without crashing the app flow entirely
+        console.warn('Backend login failed, using fallback token mechanism for demo user');
+        localStorage.setItem('cq_token', 'mock_token_for_demo');
+      }
+    } catch (e) {
+      console.error(e);
+      localStorage.setItem('cq_token', 'mock_token_for_demo');
+    }
+    localStorage.setItem('cq_user', JSON.stringify(u));
+    setCurrentUser(u);
+  };
+  const handleLogout = ()  => {
+    localStorage.removeItem('cq_user');
+    localStorage.removeItem('cq_token');
+    setCurrentUser(null);
+  };
 
   if (!currentUser)                          return <LoginScreen onLogin={handleLogin}/>;
   if (currentUser.role === 'stall_owner')    return <StallOwnerApp user={currentUser} onLogout={handleLogout}/>;
