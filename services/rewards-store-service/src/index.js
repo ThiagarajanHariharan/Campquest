@@ -362,9 +362,12 @@ app.put('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
 // ============================================================
 // Start Server
 // ============================================================
-const server = app.listen(PORT, () => {
-  console.log(`✅ Rewards-Store Service running on port ${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
-});
+let server;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`✅ Rewards-Store Service running on port ${PORT}`);
+    console.log(`   Health: http://localhost:${PORT}/health`);
+  });
+}
 
 module.exports = { app, server, pool };
