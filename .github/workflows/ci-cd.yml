@@ -17,6 +17,8 @@ jobs:
   test-services:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
 
@@ -24,11 +26,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: services/fitness-sync-service/package.json
 
       - name: Install fitness-sync dependencies
-        run: npm ci
+        run: npm install
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
