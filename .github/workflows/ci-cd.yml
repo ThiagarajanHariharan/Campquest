@@ -168,10 +168,10 @@ jobs:
 
       - name: Start services
         run: |
-          cd services/fitness-sync-service && npm install && PORT=3001 DB_HOST=localhost node src/index.js &
-          cd services/merchant-stall-service && npm install && PORT=3002 DB_HOST=localhost node src/index.js &
-          cd services/geolocation-service && npm install && PORT=3003 DB_HOST=localhost node src/index.js &
-          cd services/rewards-store-service && npm install && PORT=3004 DB_HOST=localhost node src/index.js &
+          cd services/fitness-sync-service && npm install && PORT=3001 DB_HOST=localhost NODE_ENV=production node src/index.js &
+          cd services/merchant-stall-service && npm install && PORT=3002 DB_HOST=localhost NODE_ENV=production node src/index.js &
+          cd services/geolocation-service && npm install && PORT=3003 DB_HOST=localhost NODE_ENV=production node src/index.js &
+          cd services/rewards-store-service && npm install && PORT=3004 DB_HOST=localhost NODE_ENV=production node src/index.js &
           sleep 10
         env:
           DB_HOST: localhost
