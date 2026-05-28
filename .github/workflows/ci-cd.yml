@@ -29,7 +29,7 @@ jobs:
           cache-dependency-path: services/fitness-sync-service/package.json
 
       - name: Install fitness-sync dependencies
-        run: npm ci
+        run: npm install
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
@@ -165,10 +165,10 @@ jobs:
 
       - name: Start services
         run: |
-          cd services/fitness-sync-service && npm ci && PORT=3001 DB_HOST=localhost node src/index.js &
-          cd services/merchant-stall-service && npm ci && PORT=3002 DB_HOST=localhost node src/index.js &
-          cd services/geolocation-service && npm ci && PORT=3003 DB_HOST=localhost node src/index.js &
-          cd services/rewards-store-service && npm ci && PORT=3004 DB_HOST=localhost node src/index.js &
+          cd services/fitness-sync-service && npm install && PORT=3001 DB_HOST=localhost node src/index.js &
+          cd services/merchant-stall-service && npm install && PORT=3002 DB_HOST=localhost node src/index.js &
+          cd services/geolocation-service && npm install && PORT=3003 DB_HOST=localhost node src/index.js &
+          cd services/rewards-store-service && npm install && PORT=3004 DB_HOST=localhost node src/index.js &
           sleep 10
         env:
           DB_HOST: localhost
@@ -185,7 +185,7 @@ jobs:
           echo "✅ All services healthy"
 
       - name: Install test dependencies
-        run: npm ci
+        run: npm install
         working-directory: integration-tests
 
       - name: Run integration tests
