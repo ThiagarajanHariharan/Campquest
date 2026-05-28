@@ -243,10 +243,13 @@ app.get('/api/geo/canteens/all', async (req, res) => {
 // ============================================================
 // Start Server
 // ============================================================
-const server = app.listen(PORT, () => {
-  console.log(`✅ Geo-Location Service running on port ${PORT}`);
-  console.log(`   Geofence radius: ${GEOFENCE_RADIUS_METERS}m`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
-});
+let server;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`✅ Geo-Location Service running on port ${PORT}`);
+    console.log(`   Geofence radius: ${GEOFENCE_RADIUS_METERS}m`);
+    console.log(`   Health: http://localhost:${PORT}/health`);
+  });
+}
 
 module.exports = { app, server, pool, haversineDistance };
