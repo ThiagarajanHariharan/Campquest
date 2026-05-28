@@ -74,6 +74,21 @@ describe('🏃 Fitness-Sync Service Tests', () => {
     }
   });
 
+  test('should reject sync with excessively large distance', async () => {
+    expect.assertions(2);
+    try {
+      await axios.post(`${FITNESS_URL}/api/fitness/sync`, {
+        user_id: createdUserId || 1,
+        activity_type: 'running',
+        distance_miles: 1000000000,
+        calories_burned: 400
+      });
+    } catch (err) {
+      expect(err.response.status).toBe(400);
+      expect(err.response.data.error).toBe('distance_miles is suspiciously large');
+    }
+  });
+
   test('should return leaderboard sorted by quest points', async () => {
     const res = await axios.get(`${FITNESS_URL}/api/fitness/leaderboard`);
     expect(res.status).toBe(200);

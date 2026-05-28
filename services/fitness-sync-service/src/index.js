@@ -68,6 +68,10 @@ app.post('/api/fitness/sync', async (req, res) => {
     return res.status(400).json({ error: 'distance_miles must be greater than 0' });
   }
 
+  if (distance_miles > 1000) {
+    return res.status(400).json({ error: 'distance_miles is suspiciously large' });
+  }
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
