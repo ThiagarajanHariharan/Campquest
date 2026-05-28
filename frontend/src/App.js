@@ -25,9 +25,10 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
-async function api(url, opts = {}) {
+export async function api(url, opts = {}) {
   try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+    const { headers, ...restOpts } = opts;
+    const r = await fetch(url, { headers: { 'Content-Type': 'application/json', ...headers }, ...restOpts });
     return await r.json();
   } catch { return { error: 'Service unreachable' }; }
 }
