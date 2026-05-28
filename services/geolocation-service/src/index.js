@@ -84,23 +84,42 @@ app.post('/api/geo/check-location', async (req, res) => {
   }
 
   try {
-    // Fetch all open canteens
-    const canteensResult = await pool.query(
-      `SELECT * FROM canteens WHERE is_open = true`
-    );
+    // 50m bounding box calculation (1 degree latitude is approx 111,000 meters)
+    const latDelta = GEOFENCE_RADIUS_METERS / 111000;
+    const lonDelta = GEOFENCE_RADIUS_METERS / (111000 * Math.cos(parseFloat(latitude) * Math.PI / 180));
 
-    // Find canteens within the 50m radius using Haversine
-    const nearbyCanteens = [];
-    for (const canteen of canteensResult.rows) {
-      const distance = haversineDistance(
+    // Fetch open canteens within the bounding box and calculate Haversine distance in Postgres
+    // Use LEAST to avoid out of bounds in acos function due to floating-point inaccuracy
+    const canteensResult = await pool.query(
+      `SELECT *,
+        ROUND(
+          6371000 * acos(
+            LEAST(1.0,
+              sin(radians($1)) * sin(radians(latitude)) +
+              cos(radians($1)) * cos(radians(latitude)) *
+              cos(radians(longitude) - radians($2))
+            )
+          )
+        ) as distance_meters
+       FROM canteens
+       WHERE is_open = true
+       AND latitude BETWEEN $3 AND $4
+       AND longitude BETWEEN $5 AND $6`,
+      [
         parseFloat(latitude),
         parseFloat(longitude),
-        parseFloat(canteen.latitude),
-        parseFloat(canteen.longitude)
-      );
+        parseFloat(latitude) - latDelta,
+        parseFloat(latitude) + latDelta,
+        parseFloat(longitude) - lonDelta,
+        parseFloat(longitude) + lonDelta
+      ]
+    );
 
-      if (distance <= GEOFENCE_RADIUS_METERS) {
-        nearbyCanteens.push({ ...canteen, distance_meters: Math.round(distance) });
+    // Filter canteens within the exact 50m radius based on calculated distance
+    const nearbyCanteens = [];
+    for (const canteen of canteensResult.rows) {
+      if (canteen.distance_meters <= GEOFENCE_RADIUS_METERS) {
+        nearbyCanteens.push({ ...canteen, distance_meters: parseInt(canteen.distance_meters, 10) });
       }
     }
 
