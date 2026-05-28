@@ -126,20 +126,7 @@ app.get('/api/rewards/user/:userId/transactions', async (req, res) => {
   }
 });
 
-// ============================================================
-// POST /api/rewards/claim
-// Claim merchandise using quest points (transaction-safe!)
-// ============================================================
-app.post('/api/rewards/claim', async (req, res) => {
-  const { user_id, merchandise_id, quantity = 1 } = req.body;
-
-  if (!user_id || !merchandise_id) {
-    return res.status(400).json({ error: 'Missing required fields: user_id, merchandise_id' });
-  }
-  if (quantity < 1) {
-    return res.status(400).json({ error: 'Quantity must be at least 1' });
-  }
-
+async function processClaimTransaction(user_id, merchandise_id, quantity) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -151,8 +138,7 @@ app.post('/api/rewards/claim', async (req, res) => {
     );
 
     if (merchResult.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'Merchandise not found or unavailable' });
+      throw { status: 404, payload: { error: 'Merchandise not found or unavailable' } };
     }
 
     const item = merchResult.rows[0];
@@ -160,12 +146,14 @@ app.post('/api/rewards/claim', async (req, res) => {
 
     // Check stock
     if (item.stock_quantity < quantity) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({
-        error: 'Insufficient stock',
-        available: item.stock_quantity,
-        requested: quantity
-      });
+      throw {
+        status: 400,
+        payload: {
+          error: 'Insufficient stock',
+          available: item.stock_quantity,
+          requested: quantity
+        }
+      };
     }
 
     // Lock user row to prevent race conditions on points
@@ -175,21 +163,22 @@ app.post('/api/rewards/claim', async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'User not found' });
+      throw { status: 404, payload: { error: 'User not found' } };
     }
 
     const user = userResult.rows[0];
 
     // Check user has enough points
     if (user.quest_points < totalCost) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({
-        error: 'Insufficient quest points',
-        required: totalCost,
-        available: user.quest_points,
-        shortfall: totalCost - user.quest_points
-      });
+      throw {
+        status: 400,
+        payload: {
+          error: 'Insufficient quest points',
+          required: totalCost,
+          available: user.quest_points,
+          shortfall: totalCost - user.quest_points
+        }
+      };
     }
 
     // Deduct points from user
@@ -213,19 +202,44 @@ app.post('/api/rewards/claim', async (req, res) => {
 
     await client.query('COMMIT');
 
-    res.status(201).json({
+    return {
       message: `Successfully claimed ${quantity}x ${item.name}! 🎉`,
       transaction: transactionResult.rows[0],
       item_claimed: item,
       points_spent: totalCost,
       remaining_points: updatedUserResult.rows[0].quest_points
-    });
+    };
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Error claiming merchandise:', err);
-    res.status(500).json({ error: 'Failed to claim merchandise', details: err.message });
+    throw err;
   } finally {
     client.release();
+  }
+}
+
+// ============================================================
+// POST /api/rewards/claim
+// Claim merchandise using quest points (transaction-safe!)
+// ============================================================
+app.post('/api/rewards/claim', async (req, res) => {
+  const { user_id, merchandise_id, quantity = 1 } = req.body;
+
+  if (!user_id || !merchandise_id) {
+    return res.status(400).json({ error: 'Missing required fields: user_id, merchandise_id' });
+  }
+  if (quantity < 1) {
+    return res.status(400).json({ error: 'Quantity must be at least 1' });
+  }
+
+  try {
+    const result = await processClaimTransaction(user_id, merchandise_id, quantity);
+    res.status(201).json(result);
+  } catch (err) {
+    if (err.status && err.payload) {
+      return res.status(err.status).json(err.payload);
+    }
+    console.error('Error claiming merchandise:', err);
+    res.status(500).json({ error: 'Failed to claim merchandise', details: err.message });
   }
 });
 
