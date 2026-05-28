@@ -91,16 +91,35 @@ app.post('/api/geo/check-location', async (req, res) => {
 
     // Find canteens within the 50m radius using Haversine
     const nearbyCanteens = [];
-    for (const canteen of canteensResult.rows) {
-      const distance = haversineDistance(
-        parseFloat(latitude),
-        parseFloat(longitude),
-        parseFloat(canteen.latitude),
-        parseFloat(canteen.longitude)
-      );
 
-      if (distance <= GEOFENCE_RADIUS_METERS) {
-        nearbyCanteens.push({ ...canteen, distance_meters: Math.round(distance) });
+    const userLat = parseFloat(latitude);
+    const userLon = parseFloat(longitude);
+
+    // 1 degree latitude ~ 111320 meters
+    const latDelta = GEOFENCE_RADIUS_METERS / 111320;
+    // 1 degree longitude ~ 111320 * cos(lat) meters
+    const lonDelta = GEOFENCE_RADIUS_METERS / (111320 * Math.cos(userLat * (Math.PI / 180)));
+
+    const minLat = userLat - latDelta;
+    const maxLat = userLat + latDelta;
+    const minLon = userLon - Math.abs(lonDelta);
+    const maxLon = userLon + Math.abs(lonDelta);
+
+    for (const canteen of canteensResult.rows) {
+      const cLat = parseFloat(canteen.latitude);
+      const cLon = parseFloat(canteen.longitude);
+
+      if (cLat >= minLat && cLat <= maxLat && cLon >= minLon && cLon <= maxLon) {
+        const distance = haversineDistance(
+          userLat,
+          userLon,
+          cLat,
+          cLon
+        );
+
+        if (distance <= GEOFENCE_RADIUS_METERS) {
+          nearbyCanteens.push({ ...canteen, distance_meters: Math.round(distance) });
+        }
       }
     }
 
@@ -224,10 +243,13 @@ app.get('/api/geo/canteens/all', async (req, res) => {
 // ============================================================
 // Start Server
 // ============================================================
-const server = app.listen(PORT, () => {
-  console.log(`✅ Geo-Location Service running on port ${PORT}`);
-  console.log(`   Geofence radius: ${GEOFENCE_RADIUS_METERS}m`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
-});
+let server;
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(PORT, () => {
+    console.log(`✅ Geo-Location Service running on port ${PORT}`);
+    console.log(`   Geofence radius: ${GEOFENCE_RADIUS_METERS}m`);
+    console.log(`   Health: http://localhost:${PORT}/health`);
+  });
+}
 
 module.exports = { app, server, pool, haversineDistance };
