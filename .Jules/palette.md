@@ -1,0 +1,1 @@
+## 2026-05-28 - [Missing Basic Accessibility Attributes]\n**Learning:** Incomplete basic accessibility structures—specifically missing `aria-label` attributes on icon-only buttons and the absence of `htmlFor` mapping to `id` fields on form inputs.\n**Action:** Always ensure that structural a11y labels are present when building interface components.
