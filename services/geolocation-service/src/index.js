@@ -47,7 +47,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   return R * c; // Distance in meters
 }
 
-const GEOFENCE_RADIUS_METERS = 50; // 50-meter radius
+const GEOFENCE_RADIUS_METERS = Number(process.env.GEOFENCE_RADIUS_METERS || 50); // 50-meter default radius
 
 // ============================================================
 // Health Check
