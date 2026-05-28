@@ -9,6 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ============================================================
@@ -28,7 +29,7 @@ jobs:
           cache-dependency-path: services/fitness-sync-service/package.json
 
       - name: Install fitness-sync dependencies
-        run: npm ci
+        run: npm install
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
