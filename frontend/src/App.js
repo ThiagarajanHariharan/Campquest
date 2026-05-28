@@ -25,11 +25,47 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+const _apiCache = new Map();
+const CACHE_TTL = 5000;
+
 async function api(url, opts = {}) {
-  try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
-    return await r.json();
-  } catch { return { error: 'Service unreachable' }; }
+  const isGet = !opts.method || opts.method.toUpperCase() === 'GET';
+  const now = Date.now();
+
+  if (isGet && _apiCache.has(url)) {
+    const entry = _apiCache.get(url);
+    if (entry instanceof Promise) {
+      const data = await entry;
+      return JSON.parse(JSON.stringify(data));
+    }
+    if (now - entry.timestamp < CACHE_TTL) {
+      return JSON.parse(JSON.stringify(entry.data)); // Prevent component mutation
+    }
+    // Expired
+    _apiCache.delete(url);
+  }
+
+  const promise = (async () => {
+    try {
+      const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await r.json();
+    } catch { return { error: 'Service unreachable' }; }
+  })();
+
+  if (isGet) {
+    _apiCache.set(url, promise);
+  }
+
+  const data = await promise;
+  if (isGet) {
+    // If it's an error object, do not cache it
+    if (data && data.error) {
+      _apiCache.delete(url);
+    } else {
+      _apiCache.set(url, { timestamp: now, data });
+    }
+  }
+  return JSON.parse(JSON.stringify(data));
 }
 
 // ═══════════════════════════════════════════════════════════════
