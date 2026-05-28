@@ -25,11 +25,51 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+const apiCache = new Map();
+const inFlight = new Map();
+
 async function api(url, opts = {}) {
+  const isGet = !opts.method || opts.method.toUpperCase() === 'GET';
+
+  // Invalidate cache on mutations
+  if (!isGet) {
+    apiCache.clear();
+  }
+
   try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
-    return await r.json();
-  } catch { return { error: 'Service unreachable' }; }
+    if (isGet) {
+      if (apiCache.has(url)) {
+        const cached = apiCache.get(url);
+        if (Date.now() - cached.timestamp < 5000) {
+          return JSON.parse(JSON.stringify(cached.data));
+        }
+      }
+      if (inFlight.has(url)) {
+        const data = await inFlight.get(url);
+        return JSON.parse(JSON.stringify(data));
+      }
+    }
+
+    const fetchPromise = fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts })
+      .then(r => r.json());
+
+    if (isGet) {
+      inFlight.set(url, fetchPromise);
+    }
+
+    const data = await fetchPromise;
+
+    if (isGet) {
+      apiCache.set(url, { timestamp: Date.now(), data });
+      inFlight.delete(url);
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    return data;
+  } catch {
+    if (isGet) inFlight.delete(url);
+    return { error: 'Service unreachable' };
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
