@@ -25,7 +25,7 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
-async function api(url, opts = {}) {
+export async function api(url, opts = {}) {
   try {
     const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
     return await r.json();
