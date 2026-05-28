@@ -1,5 +1,11 @@
 const { calculatePoints, haversineDistance } = require('../src/index');
 
+afterAll(done => {
+  const { pool } = require('../src/index');
+  pool.end();
+  done();
+});
+
 // ============================================================
 // Unit Tests: Fitness-Sync Service (Member A)
 // ============================================================
