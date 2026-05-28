@@ -25,11 +25,29 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+const apiCache = new Map();
 async function api(url, opts = {}) {
-  try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
-    return await r.json();
-  } catch { return { error: 'Service unreachable' }; }
+  const isGet = !opts.method || opts.method.toUpperCase() === 'GET';
+  if (isGet && apiCache.has(url)) {
+    return apiCache.get(url);
+  }
+
+  const req = (async () => {
+    try {
+      const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await r.json();
+    } catch { return { error: 'Service unreachable' }; }
+    finally {
+      if (isGet) {
+        setTimeout(() => apiCache.delete(url), 2000);
+      }
+    }
+  })();
+
+  if (isGet) {
+    apiCache.set(url, req);
+  }
+  return req;
 }
 
 // ═══════════════════════════════════════════════════════════════
