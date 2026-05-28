@@ -16,7 +16,7 @@ const DEMO_USERS = [
 ];
 
 // ─── Time-aware meal context ─────────────────────────────────
-function getMealContext() {
+export function getMealContext() {
   const h = new Date().getHours();
   if (h >= 5  && h < 11) return { label: 'Log Breakfast', emoji: '🍳', color: '#f59e0b', period: 'morning'   };
   if (h >= 11 && h < 15) return { label: 'Log Lunch',     emoji: '🍜', color: '#10b981', period: 'afternoon' };
