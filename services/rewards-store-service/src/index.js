@@ -28,6 +28,14 @@ app.use((req, res, next) => {
   next();
 });
 
+const requireAdmin = (req, res, next) => {
+  const role = req.headers['x-role'];
+  if (role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+  next();
+};
+
 // ============================================================
 // Health Check
 // ============================================================
@@ -233,7 +241,7 @@ app.post('/api/rewards/claim', async (req, res) => {
 // POST /api/rewards/merchandise
 // Add new merchandise (admin)
 // ============================================================
-app.post('/api/rewards/merchandise', async (req, res) => {
+app.post('/api/rewards/merchandise', requireAdmin, async (req, res) => {
   const { name, description, cost_in_points, stock_quantity, category } = req.body;
 
   if (!name || cost_in_points === undefined || stock_quantity === undefined) {
@@ -257,7 +265,7 @@ app.post('/api/rewards/merchandise', async (req, res) => {
 // PUT /api/rewards/merchandise/:merchandiseId
 // Update merchandise details
 // ============================================================
-app.put('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
+app.put('/api/rewards/merchandise/:merchandiseId', requireAdmin, async (req, res) => {
   const { merchandiseId } = req.params;
   const { name, description, cost_in_points, stock_quantity, is_available, category } = req.body;
 
