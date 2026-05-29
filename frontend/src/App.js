@@ -25,11 +25,45 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+const apiCache = new Map();
+const CACHE_TTL = 5000;
+
 async function api(url, opts = {}) {
-  try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
-    return await r.json();
-  } catch { return { error: 'Service unreachable' }; }
+  const method = opts.method || 'GET';
+
+  // ⚡ Bolt Optimization: Invalidate cache on mutations to prevent stale data
+  if (method !== 'GET') {
+    apiCache.clear();
+    try {
+      const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await r.json();
+    } catch { return { error: 'Service unreachable' }; }
+  }
+
+  // Include headers/opts in cache key to avoid collisions if identical URLs are requested with different headers
+  const cacheKey = url + JSON.stringify(opts);
+  const now = Date.now();
+  const cached = apiCache.get(cacheKey);
+
+  // ⚡ Bolt Optimization: Deduplicate concurrent requests and use short TTL cache
+  if (cached && (now - cached.timestamp < CACHE_TTL)) {
+    const data = await cached.promise;
+    return typeof structuredClone === 'function' ? structuredClone(data) : JSON.parse(JSON.stringify(data)); // Deep clone to prevent state mutation
+  }
+
+  const promise = (async () => {
+    try {
+      const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await r.json();
+    } catch {
+      return { error: 'Service unreachable' };
+    }
+  })();
+
+  apiCache.set(cacheKey, { promise, timestamp: now });
+
+  const data = await promise;
+  return typeof structuredClone === 'function' ? structuredClone(data) : JSON.parse(JSON.stringify(data));
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -1,0 +1,3 @@
+## 2024-05-29 - Frontend API Wrapper Caching
+**Learning:** In a React application, a global API wrapper missing request deduplication leads to redundant network calls when multiple components mount concurrently or when Strict Mode triggers double-renders. Additionally, caching objects without deep cloning can lead to insidious state-sharing bugs where a component mutates the response, poisoning the cache for others.
+**Action:** When implementing a global fetch cache, always cache the `Promise` to deduplicate in-flight requests, use a short TTL for volatile data, and strictly return deep clones (e.g., via `structuredClone`) to preserve immutability and isolate component state.
