@@ -25,11 +25,50 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+const apiCache = new Map();
+const CACHE_TTL = 5000; // 5 seconds
+
 async function api(url, opts = {}) {
-  try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
-    return await r.json();
-  } catch { return { error: 'Service unreachable' }; }
+  const method = opts.method || 'GET';
+
+  // Invalidate cache on non-GET mutations to prevent returning stale data
+  if (method !== 'GET') {
+    apiCache.clear();
+  } else {
+    // Check if we have a valid cached promise (handles concurrent in-flight requests)
+    const cacheKey = url;
+    if (apiCache.has(cacheKey)) {
+      const { promise, timestamp } = apiCache.get(cacheKey);
+      if (Date.now() - timestamp < CACHE_TTL) {
+        try {
+          const data = await promise;
+          // Return a deep clone to prevent state mutation
+          return typeof structuredClone === 'function' ? structuredClone(data) : JSON.parse(JSON.stringify(data));
+        } catch (e) {
+          // If promise failed, let it fall through and retry
+        }
+      }
+    }
+  }
+
+  // The actual fetch request wrapped in a promise
+  const fetchPromise = (async () => {
+    try {
+      const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await r.json();
+    } catch {
+      return { error: 'Service unreachable' };
+    }
+  })();
+
+  // Cache the promise for GET requests
+  if (method === 'GET') {
+    apiCache.set(url, { promise: fetchPromise, timestamp: Date.now() });
+  }
+
+  const data = await fetchPromise;
+  // Deep clone the fresh data before returning to prevent reference sharing between the cache and components
+  return (method === 'GET') ? (typeof structuredClone === 'function' ? structuredClone(data) : JSON.parse(JSON.stringify(data))) : data;
 }
 
 // ═══════════════════════════════════════════════════════════════
