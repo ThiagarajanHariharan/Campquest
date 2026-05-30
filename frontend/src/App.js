@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 // ─── Service URLs ────────────────────────────────────────────
@@ -92,12 +92,12 @@ function MealModal({ meal, onClose, onLog }) {
         <h3>{meal.emoji} {meal.label}</h3>
         <p className="modal-sub">What did you eat? Log your calories below.</p>
         <div className="form-group">
-          <label>Description</label>
-          <input placeholder="e.g. Chicken rice, Milo" value={desc} onChange={e => setDesc(e.target.value)}/>
+          <label htmlFor="desc-input">Description</label>
+          <input id="desc-input" placeholder="e.g. Chicken rice, Milo" value={desc} onChange={e => setDesc(e.target.value)}/>
         </div>
         <div className="form-group">
-          <label>Calories (kcal)</label>
-          <input type="number" placeholder="e.g. 600" value={cal} onChange={e => setCal(e.target.value)}/>
+          <label htmlFor="cal-input">Calories (kcal)</label>
+          <input id="cal-input" type="number" placeholder="e.g. 600" value={cal} onChange={e => setCal(e.target.value)}/>
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
@@ -171,7 +171,7 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
       <div className="drawer">
         <div className="drawer-header">
           <h3>⚙️ Settings</h3>
-          <button className="icon-btn" onClick={onClose}>✕</button>
+          <button className="icon-btn" aria-label="Close Settings" onClick={onClose}>✕</button>
         </div>
         <div className="drawer-avatar">
           <div className="avatar-circle">{user.name[0].toUpperCase()}</div>
@@ -236,7 +236,7 @@ function StallOwnerApp({ user, onLogout }) {
       <header className="header" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
         <div className="header-content">
           <div className="logo"><span>🏪</span><h1>Stall Dashboard</h1></div>
-          <button className="icon-btn" onClick={onLogout}>🚪</button>
+          <button className="icon-btn" aria-label="Log Out" onClick={onLogout}>🚪</button>
         </div>
       </header>
       <main className="main" style={{ textAlign: 'center', paddingTop: 60 }}>
@@ -282,12 +282,12 @@ function LoginScreen({ onLogin }) {
         <p className="login-sub">Your campus fitness companion</p>
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Username</label>
-            <input placeholder="Enter your username" value={username} onChange={e => { setUsername(e.target.value); setError(''); }}/>
+            <label htmlFor="username-input">Username</label>
+            <input id="username-input" placeholder="Enter your username" value={username} onChange={e => { setUsername(e.target.value); setError(''); }}/>
           </div>
           <div className="form-group">
-            <label>Password</label>
-            <input type="password" placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }}/>
+            <label htmlFor="password-input">Password</label>
+            <input id="password-input" type="password" placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }}/>
           </div>
           {error && <p className="login-error">{error}</p>}
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: 8 }}>
@@ -358,7 +358,7 @@ function StudentApp({ user, onLogout }) {
     setTimeout(() => setToast(null), 4000);
   };
 
-  const handleMealLog = (cal, desc) => {
+  const handleMealLog = (cal) => {
     const newTotal = ingested + cal;
     setIngested(newTotal);
     localStorage.setItem(`ing_${user.id}_${today()}`, newTotal);
@@ -407,13 +407,13 @@ function StudentApp({ user, onLogout }) {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <button className="icon-btn" onClick={() => setShowSettings(true)}>☰</button>
+          <button className="icon-btn" aria-label="Open Menu" onClick={() => setShowSettings(true)}>☰</button>
           <div className="header-center">
             <span className="greeting">Greetings, {user.name}! 👋</span>
           </div>
           <div className="header-right">
             <span className="points-badge">⭐ {questPoints}</span>
-            <button className="icon-btn" onClick={() => setShowSettings(true)}>⚙️</button>
+            <button className="icon-btn" aria-label="Open Settings" onClick={() => setShowSettings(true)}>⚙️</button>
           </div>
         </div>
       </header>
@@ -470,7 +470,7 @@ function StudentApp({ user, onLogout }) {
           {/* Bonus Points Banner */}
           {bonusPts > 0 && (
             <div className="bonus-banner">
-              🔥 You've burned more than you ate today! Bonus <strong>+{bonusPts} pts</strong> unlocked!
+              🔥 You&apos;ve burned more than you ate today! Bonus <strong>+{bonusPts} pts</strong> unlocked!
             </div>
           )}
 
