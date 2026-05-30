@@ -234,6 +234,12 @@ app.post('/api/rewards/claim', async (req, res) => {
 // Add new merchandise (admin)
 // ============================================================
 app.post('/api/rewards/merchandise', async (req, res) => {
+  // Security Enhancement: Enforce RBAC via x-role header
+  const role = req.headers['x-role'];
+  if (role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Insufficient privileges' });
+  }
+
   const { name, description, cost_in_points, stock_quantity, category } = req.body;
 
   if (!name || cost_in_points === undefined || stock_quantity === undefined) {
@@ -258,6 +264,12 @@ app.post('/api/rewards/merchandise', async (req, res) => {
 // Update merchandise details
 // ============================================================
 app.put('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
+  // Security Enhancement: Enforce RBAC via x-role header
+  const role = req.headers['x-role'];
+  if (role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Insufficient privileges' });
+  }
+
   const { merchandiseId } = req.params;
   const { name, description, cost_in_points, stock_quantity, is_available, category } = req.body;
 
