@@ -1,0 +1,3 @@
+## 2024-05-18 - Promise Caching Pitfalls
+**Learning:** When caching promises to deduplicate concurrent requests, it is critical to perform deep cloning (e.g., `structuredClone`) *after* the promise is awaited by each caller. If the deep clone is performed *inside* the cached promise itself, all concurrent callers waiting on that same promise will receive the exact same object reference, breaking immutability and causing subtle state mutation bugs in React.
+**Action:** When implementing promise-based caching mechanisms, store the raw `fetchPromise` and ensure the cloning logic is applied to the resolved `result` inside the main function body before returning it to the caller.
