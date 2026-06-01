@@ -5,6 +5,11 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+if (!process.env.DB_PASSWORD) {
+  console.error('CRITICAL: DB_PASSWORD environment variable is required');
+  process.exit(1);
+}
+
 // ============================================================
 // Database Connection
 // ============================================================
@@ -13,7 +18,7 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
   database: process.env.DB_NAME || 'campusquest_db',
   user: process.env.DB_USER || 'campusquest_user',
-  password: process.env.DB_PASSWORD || 'campusquest_pass',
+  password: process.env.DB_PASSWORD,
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
