@@ -25,11 +25,47 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+// In-memory cache for deduplicating concurrent GET requests
+const apiCache = new Map();
+
 async function api(url, opts = {}) {
-  try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
-    return await r.json();
-  } catch { return { error: 'Service unreachable' }; }
+  const isGet = !opts.method || opts.method.toUpperCase() === 'GET';
+
+  // Clear cache on mutations to prevent stale data
+  if (!isGet) {
+    apiCache.clear();
+  }
+
+  const cacheKey = `${url}`;
+
+  if (isGet && apiCache.has(cacheKey)) {
+    try {
+      const cachedResult = await apiCache.get(cacheKey);
+      // Deep clone AFTER awaiting to avoid concurrent mutation vulnerabilities
+      return typeof structuredClone === 'function' ? structuredClone(cachedResult) : JSON.parse(JSON.stringify(cachedResult));
+    } catch {
+      // If cached promise rejected, fall through and retry
+    }
+  }
+
+  const requestPromise = (async () => {
+    try {
+      const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      return await r.json();
+    } catch {
+      return { error: 'Service unreachable' };
+    }
+  })();
+
+  if (isGet) {
+    apiCache.set(cacheKey, requestPromise);
+    // Short TTL to deduplicate concurrent requests
+    setTimeout(() => apiCache.delete(cacheKey), 5000);
+  }
+
+  const result = await requestPromise;
+  // Deep clone to prevent the caller from mutating the cached object
+  return isGet ? (typeof structuredClone === 'function' ? structuredClone(result) : JSON.parse(JSON.stringify(result))) : result;
 }
 
 // ═══════════════════════════════════════════════════════════════
