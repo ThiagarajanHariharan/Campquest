@@ -33,7 +33,7 @@ jobs:
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
-        run: npm test -- --ci --passWithNoTests
+        run: DB_PASSWORD=campusquest_pass npm test -- --ci --passWithNoTests
         working-directory: services/fitness-sync-service
 
       - name: Upload coverage report
