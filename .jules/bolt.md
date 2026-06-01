@@ -1,0 +1,3 @@
+## 2026-04-24 - Promise Caching Concurrent Mutation Vulnerability
+**Learning:** When caching promises (e.g., in a frontend `api()` wrapper) to deduplicate concurrent requests, deep cloning using `structuredClone` (or JSON fallback) must happen *after* awaiting the cached promise. If cloning happens inside the cached promise itself, concurrent callers awaiting the same promise will receive the exact same object reference, leading to state mutation vulnerabilities.
+**Action:** Always ensure deep cloning is performed *after* the promise resolves, so each caller gets a fresh, isolated copy of the data.
