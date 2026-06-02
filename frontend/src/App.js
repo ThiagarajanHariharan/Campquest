@@ -25,11 +25,49 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+const apiCache = new Map();
+
 async function api(url, opts = {}) {
+  const method = (opts.method || 'GET').toUpperCase();
+
+  // ⚡ Bolt Optimization: Invalidate cache on non-GET requests to prevent stale data
+  if (method !== 'GET') {
+    apiCache.clear();
+  }
+
   try {
-    const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
-    return await r.json();
-  } catch { return { error: 'Service unreachable' }; }
+    // ⚡ Bolt Optimization: Cache the raw promise to deduplicate concurrent requests.
+    // Impact: Eliminates duplicate network requests on component mount, saving bandwidth and reducing load time.
+    if (method === 'GET' && apiCache.has(url)) {
+      const cachedData = await apiCache.get(url);
+      try {
+        // Deep clone the cached data to prevent state mutation vulnerabilities
+        return structuredClone(cachedData);
+      } catch (e) {
+        return JSON.parse(JSON.stringify(cachedData));
+      }
+    }
+
+    const fetchPromise = fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts })
+      .then(r => r.json());
+
+    if (method === 'GET') {
+      apiCache.set(url, fetchPromise);
+      // TTL of 2000ms to clear the cache automatically
+      setTimeout(() => apiCache.delete(url), 2000);
+
+      const data = await fetchPromise;
+      try {
+        return structuredClone(data);
+      } catch (e) {
+        return JSON.parse(JSON.stringify(data));
+      }
+    }
+
+    return await fetchPromise;
+  } catch {
+    return { error: 'Service unreachable' };
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
