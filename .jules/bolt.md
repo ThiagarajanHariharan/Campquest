@@ -1,0 +1,3 @@
+## 2024-06-02 - Frontend API Promise Caching & Cloning
+**Learning:** In React applications without fetching libraries, duplicate concurrent GET requests often occur during component mounting. Caching the raw Promise deduplicates these in-flight requests, but if the promise resolves to the same object reference, concurrent callers might mutate the shared state.
+**Action:** When implementing custom API caching, cache the promise to deduplicate network requests, but always return a deep clone (e.g., via `structuredClone`) *after* awaiting the cached promise to prevent state mutation vulnerabilities. Clear the cache on non-GET mutations to avoid stale data.
