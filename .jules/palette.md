@@ -1,0 +1,3 @@
+## 2025-10-27 - Accessible Custom Switches
+**Learning:** The app implements custom switch toggles using `div` elements and class name swapping (e.g., `.toggle.on`). These lack semantic meaning and keyboard interactability by default, rendering them invisible or unusable to screen reader and keyboard-only users.
+**Action:** When working with custom `div`-based toggles in this app, always ensure they are enhanced with `role="switch"`, `aria-checked`, `tabIndex={0}`, an appropriate `aria-labelledby` or `aria-label`, and an `onKeyDown` handler to capture 'Enter' or 'Space' key presses for full accessibility.
