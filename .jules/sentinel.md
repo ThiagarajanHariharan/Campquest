@@ -1,0 +1,4 @@
+## 2026-04-24 - Missing Authorization on Admin Endpoints
+**Vulnerability:** Unauthenticated/unauthorized users could create or update merchandise in the rewards store service via `POST /api/rewards/merchandise` and `PUT /api/rewards/merchandise/:merchandiseId`.
+**Learning:** These endpoints were documented as "(admin)" but lacked the actual RBAC enforcement mechanism in code, likely due to oversight when separating the application into microservices lacking centralized auth.
+**Prevention:** Always verify that endpoints intended for privileged roles explicitly enforce authorization (e.g. checking `x-role` header) before processing the request.
