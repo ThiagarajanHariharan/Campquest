@@ -25,7 +25,38 @@ function getMealContext() {
 }
 
 // ─── API helper ───────────────────────────────────────────────
+const apiCache = new Map();
+
 async function api(url, opts = {}) {
+  const method = opts.method || 'GET';
+
+  // Invalidate cache on non-GET mutations to prevent returning stale data
+  if (method !== 'GET') {
+    apiCache.clear();
+  }
+
+  const cacheKey = `${method}:${url}`;
+
+  if (method === 'GET') {
+    if (!apiCache.has(cacheKey)) {
+      const promise = (async () => {
+        try {
+          const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+          return await r.json();
+        } catch {
+          return { error: 'Service unreachable' };
+        }
+      })();
+      apiCache.set(cacheKey, promise);
+      // Short TTL to deduplicate concurrent requests
+      setTimeout(() => apiCache.delete(cacheKey), 50);
+    }
+
+    const data = await apiCache.get(cacheKey);
+    // Deep clone after awaiting the cached promise to prevent state mutation vulnerabilities
+    return typeof structuredClone === 'function' ? structuredClone(data) : JSON.parse(JSON.stringify(data));
+  }
+
   try {
     const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
     return await r.json();
@@ -470,7 +501,7 @@ function StudentApp({ user, onLogout }) {
           {/* Bonus Points Banner */}
           {bonusPts > 0 && (
             <div className="bonus-banner">
-              🔥 You've burned more than you ate today! Bonus <strong>+{bonusPts} pts</strong> unlocked!
+              🔥 You&apos;ve burned more than you ate today! Bonus <strong>+{bonusPts} pts</strong> unlocked!
             </div>
           )}
 
