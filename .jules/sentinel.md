@@ -1,0 +1,4 @@
+## 2024-06-04 - Missing Admin Endpoint Authorization
+**Vulnerability:** Missing Role-Based Access Control (RBAC) on admin-only merchandise creation and update endpoints in `rewards-store-service`.
+**Learning:** Custom RBAC implementations relying on custom HTTP headers (like `x-role`) are prone to being forgotten if not centralized. The application lacks a centralized token-based auth mechanism, meaning each endpoint must explicitly check for the required role.
+**Prevention:** Implement a centralized middleware function to handle authorization checks and ensure it's applied consistently to all administrative routes across the application.
