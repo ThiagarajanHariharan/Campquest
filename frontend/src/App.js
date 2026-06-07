@@ -192,20 +192,36 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
         </div>
         {/* Theme */}
         <div className="drawer-section">
-          <label className="drawer-label">🎨 Theme</label>
+          <label className="drawer-label" id="theme-label">🎨 Theme</label>
           <div className="toggle-row">
-            <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-            <div className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onThemeToggle}>
+            <span aria-hidden="true">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+            <div
+              className={`toggle ${theme === 'dark' ? 'on' : ''}`}
+              onClick={onThemeToggle}
+              role="switch"
+              aria-checked={theme === 'dark'}
+              aria-labelledby="theme-label"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onThemeToggle(); } }}
+            >
               <div className="toggle-knob"/>
             </div>
           </div>
         </div>
         {/* Notifications */}
         <div className="drawer-section">
-          <label className="drawer-label">🔔 Notifications</label>
+          <label className="drawer-label" id="notif-label">🔔 Notifications</label>
           <div className="toggle-row">
-            <span>{notifications ? 'Enabled' : 'Disabled'}</span>
-            <div className={`toggle ${notifications ? 'on' : ''}`} onClick={onNotifToggle}>
+            <span aria-hidden="true">{notifications ? 'Enabled' : 'Disabled'}</span>
+            <div
+              className={`toggle ${notifications ? 'on' : ''}`}
+              onClick={onNotifToggle}
+              role="switch"
+              aria-checked={notifications}
+              aria-labelledby="notif-label"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNotifToggle(); } }}
+            >
               <div className="toggle-knob"/>
             </div>
           </div>
