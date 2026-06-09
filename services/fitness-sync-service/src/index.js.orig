@@ -231,12 +231,9 @@ app.get('/api/fitness/activities', async (req, res) => {
 // ============================================================
 // Start Server
 // ============================================================
-let server;
-if (require.main === module) {
-  server = app.listen(PORT, () => {
-    console.log(`✅ Fitness-Sync Service running on port ${PORT}`);
-    console.log(`   Health: http://localhost:${PORT}/health`);
-  });
-}
+const server = app.listen(PORT, () => {
+  console.log(`✅ Fitness-Sync Service running on port ${PORT}`);
+  console.log(`   Health: http://localhost:${PORT}/health`);
+});
 
 module.exports = { app, server, pool };
