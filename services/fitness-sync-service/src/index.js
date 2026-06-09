@@ -127,6 +127,7 @@ app.get('/api/fitness/user/:userId', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+        // ⚡ Bolt: Fetch independent user activities and stats concurrently for performance
     const [activitiesResult, statsResult] = await Promise.all([
       pool.query(
         `SELECT * FROM fitness_activities WHERE user_id = $1 ORDER BY synced_at DESC LIMIT 20`,
