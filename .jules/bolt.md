@@ -1,0 +1,3 @@
+## 2024-06-10 - Optimize sequential PostgreSQL queries
+**Learning:** Sequential, independent database queries within a single endpoint handle result in unnecessary response latency because each query awaits a separate database round-trip before the next can begin.
+**Action:** When handling endpoints with multiple independent data retrieval requirements (like fetching a user's `activities` and their aggregated `stats`), always wrap the queries in a `Promise.all()` block so they execute concurrently, significantly reducing overall execution time.
