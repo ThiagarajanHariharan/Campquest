@@ -1,0 +1,3 @@
+## 2024-06-11 - Accessible Custom Switch Toggles
+**Learning:** Found a pattern of custom `div`-based switch toggles (e.g., `<div className="toggle">`) that lacked keyboard accessibility and screen reader support. Users relying on keyboard navigation could not reach or interact with them.
+**Action:** When implementing or modifying custom `div`-based switch toggles, always ensure they include `role="switch"`, dynamically updated `aria-checked`, `tabIndex={0}` to be focusable, an appropriate `aria-label` or `aria-labelledby`, and an `onKeyDown` handler that triggers the toggle on 'Enter' or 'Space' key presses.
