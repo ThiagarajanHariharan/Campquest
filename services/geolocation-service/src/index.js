@@ -154,15 +154,18 @@ app.post('/api/geo/check-location', async (req, res) => {
 app.get('/api/geo/canteen/:canteenId/menu', async (req, res) => {
   const { canteenId } = req.params;
   try {
-    const canteenResult = await pool.query('SELECT * FROM canteens WHERE id = $1', [canteenId]);
+    // ⚡ Bolt: Fetch independent data points concurrently to reduce response latency
+    const [canteenResult, menuResult] = await Promise.all([
+      pool.query('SELECT * FROM canteens WHERE id = $1', [canteenId]),
+      pool.query(
+        `SELECT * FROM menu_items WHERE canteen_id = $1 AND is_available = true ORDER BY name`,
+        [canteenId]
+      )
+    ]);
+
     if (canteenResult.rows.length === 0) {
       return res.status(404).json({ error: 'Canteen not found' });
     }
-
-    const menuResult = await pool.query(
-      `SELECT * FROM menu_items WHERE canteen_id = $1 AND is_available = true ORDER BY name`,
-      [canteenId]
-    );
 
     res.json({ canteen: canteenResult.rows[0], menu: menuResult.rows, item_count: menuResult.rows.length });
   } catch (err) {
