@@ -192,20 +192,36 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
         </div>
         {/* Theme */}
         <div className="drawer-section">
-          <label className="drawer-label">🎨 Theme</label>
+          <label className="drawer-label" id="theme-toggle-label">🎨 Theme</label>
           <div className="toggle-row">
             <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-            <div className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onThemeToggle}>
+            <div
+              className={`toggle ${theme === 'dark' ? 'on' : ''}`}
+              onClick={onThemeToggle}
+              role="switch"
+              aria-checked={theme === 'dark'}
+              aria-labelledby="theme-toggle-label"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onThemeToggle(); } }}
+            >
               <div className="toggle-knob"/>
             </div>
           </div>
         </div>
         {/* Notifications */}
         <div className="drawer-section">
-          <label className="drawer-label">🔔 Notifications</label>
+          <label className="drawer-label" id="notif-toggle-label">🔔 Notifications</label>
           <div className="toggle-row">
             <span>{notifications ? 'Enabled' : 'Disabled'}</span>
-            <div className={`toggle ${notifications ? 'on' : ''}`} onClick={onNotifToggle}>
+            <div
+              className={`toggle ${notifications ? 'on' : ''}`}
+              onClick={onNotifToggle}
+              role="switch"
+              aria-checked={notifications}
+              aria-labelledby="notif-toggle-label"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNotifToggle(); } }}
+            >
               <div className="toggle-knob"/>
             </div>
           </div>
