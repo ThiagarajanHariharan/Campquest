@@ -1,0 +1,3 @@
+## 2024-06-19 - Added accessibility to UI
+**Learning:** The `SettingsDrawer` components were using `div` tags with `className="toggle"` acting as a custom switch. Screen readers would not interpret them as switches and keyboard users could not interact with them. In addition, there were multiple `button className="icon-btn"` elements that used just icons without explicit text, so screen readers had no way to explain the button's purpose to the user.
+**Action:** Add `role="switch"`, `aria-checked`, `tabIndex={0}`, and an `onKeyDown` handler to custom switch elements like `div.toggle`, and ensure that buttons using only emojis/icons have descriptive `aria-label`s.

@@ -171,7 +171,7 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
       <div className="drawer">
         <div className="drawer-header">
           <h3>⚙️ Settings</h3>
-          <button className="icon-btn" onClick={onClose}>✕</button>
+          <button className="icon-btn" onClick={onClose} aria-label="Close settings">✕</button>
         </div>
         <div className="drawer-avatar">
           <div className="avatar-circle">{user.name[0].toUpperCase()}</div>
@@ -195,7 +195,7 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
           <label className="drawer-label">🎨 Theme</label>
           <div className="toggle-row">
             <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-            <div className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onThemeToggle}>
+            <div className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onThemeToggle} role="switch" aria-checked={theme === 'dark'} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onThemeToggle(); } }} aria-label="Toggle theme">
               <div className="toggle-knob"/>
             </div>
           </div>
@@ -205,7 +205,7 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
           <label className="drawer-label">🔔 Notifications</label>
           <div className="toggle-row">
             <span>{notifications ? 'Enabled' : 'Disabled'}</span>
-            <div className={`toggle ${notifications ? 'on' : ''}`} onClick={onNotifToggle}>
+            <div className={`toggle ${notifications ? 'on' : ''}`} onClick={onNotifToggle} role="switch" aria-checked={notifications} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNotifToggle(); } }} aria-label="Toggle notifications">
               <div className="toggle-knob"/>
             </div>
           </div>
@@ -236,7 +236,7 @@ function StallOwnerApp({ user, onLogout }) {
       <header className="header" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
         <div className="header-content">
           <div className="logo"><span>🏪</span><h1>Stall Dashboard</h1></div>
-          <button className="icon-btn" onClick={onLogout}>🚪</button>
+          <button className="icon-btn" onClick={onLogout} aria-label="Log out">🚪</button>
         </div>
       </header>
       <main className="main" style={{ textAlign: 'center', paddingTop: 60 }}>
@@ -407,13 +407,13 @@ function StudentApp({ user, onLogout }) {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <button className="icon-btn" onClick={() => setShowSettings(true)}>☰</button>
+          <button className="icon-btn" onClick={() => setShowSettings(true)} aria-label="Open menu">☰</button>
           <div className="header-center">
             <span className="greeting">Greetings, {user.name}! 👋</span>
           </div>
           <div className="header-right">
             <span className="points-badge">⭐ {questPoints}</span>
-            <button className="icon-btn" onClick={() => setShowSettings(true)}>⚙️</button>
+            <button className="icon-btn" onClick={() => setShowSettings(true)} aria-label="Settings">⚙️</button>
           </div>
         </div>
       </header>
