@@ -105,7 +105,7 @@ app.post('/api/fitness/sync', async (req, res) => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error syncing fitness activity:', err);
-    res.status(500).json({ error: 'Failed to sync fitness activity', details: err.message });
+    res.status(500).json({ error: 'Failed to sync fitness activity', details: "Internal Server Error" });
   } finally {
     client.release();
   }
@@ -149,7 +149,7 @@ app.get('/api/fitness/user/:userId', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching user data:', err);
-    res.status(500).json({ error: 'Failed to fetch user data', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch user data', details: "Internal Server Error" });
   }
 });
 
@@ -173,7 +173,7 @@ app.get('/api/fitness/leaderboard', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching leaderboard:', err);
-    res.status(500).json({ error: 'Failed to fetch leaderboard', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch leaderboard', details: "Internal Server Error" });
   }
 });
 
@@ -199,7 +199,7 @@ app.post('/api/fitness/user', async (req, res) => {
       return res.status(409).json({ error: 'Username or email already exists' });
     }
     console.error('Error creating user:', err);
-    res.status(500).json({ error: 'Failed to create user', details: err.message });
+    res.status(500).json({ error: 'Failed to create user', details: "Internal Server Error" });
   }
 });
 
@@ -224,7 +224,7 @@ app.get('/api/fitness/activities', async (req, res) => {
     res.json({ activities: result.rows, count: result.rows.length });
   } catch (err) {
     console.error('Error fetching activities:', err);
-    res.status(500).json({ error: 'Failed to fetch activities', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch activities', details: "Internal Server Error" });
   }
 });
 
