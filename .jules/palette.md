@@ -1,0 +1,3 @@
+## 2024-10-24 - Custom Switch Toggles Accessibility Pattern
+**Learning:** Custom `div`-based toggles (switches) used in the Settings Drawer were entirely inaccessible to keyboard and screen reader users. They lacked focusability, semantic meaning, state indication, and keyboard event handlers, making them unusable for anyone relying on non-pointer interactions.
+**Action:** Always enhance custom `div` switches by adding `role="switch"`, dynamically binding `aria-checked` to the state, ensuring they are focusable with `tabIndex={0}`, labeling them properly with `aria-labelledby`, handling `onKeyDown` to toggle on 'Enter' or 'Space' (`e.preventDefault()` prevents page scroll on Space), and providing a clear `:focus-visible` styling ring.
