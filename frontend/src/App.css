@@ -256,3 +256,4 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   .stats-grid { gap: 8px; }
   .stat-val { font-size: 1.3rem; }
 }
+.toggle:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
