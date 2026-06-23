@@ -195,7 +195,20 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
           <label className="drawer-label">🎨 Theme</label>
           <div className="toggle-row">
             <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-            <div className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onThemeToggle}>
+            <div
+              className={`toggle ${theme === 'dark' ? 'on' : ''}`}
+              role="switch"
+              aria-checked={theme === 'dark'}
+              tabIndex={0}
+              aria-label="Toggle theme"
+              onClick={onThemeToggle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onThemeToggle();
+                }
+              }}
+            >
               <div className="toggle-knob"/>
             </div>
           </div>
@@ -205,7 +218,20 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
           <label className="drawer-label">🔔 Notifications</label>
           <div className="toggle-row">
             <span>{notifications ? 'Enabled' : 'Disabled'}</span>
-            <div className={`toggle ${notifications ? 'on' : ''}`} onClick={onNotifToggle}>
+            <div
+              className={`toggle ${notifications ? 'on' : ''}`}
+              role="switch"
+              aria-checked={notifications}
+              tabIndex={0}
+              aria-label="Toggle notifications"
+              onClick={onNotifToggle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onNotifToggle();
+                }
+              }}
+            >
               <div className="toggle-knob"/>
             </div>
           </div>
