@@ -1,0 +1,3 @@
+## 2024-06-27 - Accessible custom toggles
+**Learning:** Custom `div`-based switch components break keyboard navigation and screen readers if not properly configured. They must have `role="switch"`, `aria-checked` state, `tabIndex={0}`, an accessible label (`aria-labelledby`), and `onKeyDown` handlers for Enter/Space to ensure they function like native inputs. CSS `:focus-visible` must also be provided for clear visual keyboard navigation.
+**Action:** Always verify custom interactive `div` elements include proper `role`, ARIA states, keyboard events (`onKeyDown` capturing 'Enter'/'Space'), and focus-visible styling.
