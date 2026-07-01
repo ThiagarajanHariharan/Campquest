@@ -1,0 +1,3 @@
+## 2024-05-20 - Concurrent Database Queries Optimization
+**Learning:** The application executes independent PostgreSQL queries sequentially in some route handlers (e.g., fetching activities and stats), which artificially inflates response times. Awaiting independent queries inside `Promise.all()` significantly improves throughput by executing them concurrently.
+**Action:** Always inspect route handlers with multiple independent database queries. Await validation queries (like 404 checks) first to fail fast, then wrap the remaining independent data-fetching queries in `Promise.all()` to run them concurrently.
