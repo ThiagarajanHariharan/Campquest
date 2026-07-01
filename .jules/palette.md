@@ -1,0 +1,3 @@
+## 2024-07-01 - Add accessibility to custom div-based toggles
+**Learning:** Custom `div` elements used as switch toggles lack native keyboard and screen reader support. They require specific ARIA attributes (`role="switch"`, `aria-checked`), keyboard event handlers (`onKeyDown` for Enter/Space), and visual focus indicators to be fully accessible.
+**Action:** When working with custom toggles, always ensure they are fully accessible by adding `role="switch"`, `aria-checked`, `tabIndex={0}`, an appropriate `aria-label`, an `onKeyDown` handler to capture 'Enter' or 'Space' key presses (using `e.preventDefault()` to prevent page scroll), and providing a clear `:focus-visible` CSS outline for keyboard navigation.
