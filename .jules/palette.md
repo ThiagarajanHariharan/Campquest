@@ -1,3 +1,0 @@
-## 2024-07-02 - Custom Toggle Switches Accessibility Pattern
-**Learning:** The application implements custom switch toggles using standard `div` elements (e.g., `.toggle`). These lack native accessibility, meaning they are completely invisible to screen readers and inaccessible via keyboard navigation.
-**Action:** When working with these custom `div`-based toggles, always ensure they are fully accessible by adding `role="switch"`, `aria-checked`, `tabIndex={0}`, an appropriate `aria-labelledby` or `aria-label`, an `onKeyDown` handler to capture 'Enter' or 'Space' key presses (using `e.preventDefault()` to prevent page scroll), and providing a clear `:focus-visible` CSS outline for keyboard navigation.
