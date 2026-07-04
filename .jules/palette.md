@@ -1,0 +1,3 @@
+## 2024-07-04 - Accessible custom div-based toggles
+**Learning:** Custom switch toggles built with `div` elements are entirely inaccessible to screen readers and keyboard users by default, preventing them from interacting with critical settings like Theme and Notifications.
+**Action:** Always ensure custom `div`-based toggles are fully accessible by adding `role="switch"`, `aria-checked`, `tabIndex={0}`, an appropriate `aria-labelledby` or `aria-label`, an `onKeyDown` handler to capture 'Enter' or 'Space' key presses (using `e.preventDefault()` to prevent page scroll), and providing a clear `:focus-visible` CSS outline for keyboard navigation.
