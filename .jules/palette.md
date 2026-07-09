@@ -1,0 +1,3 @@
+## 2025-01-01 - Add Accessible Toggle Switch and ARIA Labels
+**Learning:** Custom toggle switches (using div elements) must have standard accessible attributes like `role="switch"`, `aria-checked`, and `tabIndex={0}`. They also need `onKeyDown` handlers to capture 'Enter' or 'Space' for keyboard users (with `e.preventDefault()` to prevent scrolling). Also, icon-only buttons need `aria-label`s to be screen reader compatible. Missing `:focus-visible` outline makes these elements hard to navigate using keyboard alone.
+**Action:** Always add `aria-label` to icon-only buttons (especially emojis). Add `role="switch"`, `aria-checked`, `tabIndex={0}`, keyboard event handlers, and ensure clear `:focus-visible` states for interactive elements to improve accessibility.
