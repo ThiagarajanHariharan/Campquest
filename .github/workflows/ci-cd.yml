@@ -20,12 +20,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Set up Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: services/fitness-sync-service/package.json
+          cache: "pnpm"
+          cache-dependency-path: "services/**/pnpm-lock.yaml"
 
       - name: Install fitness-sync dependencies
         run: pnpm install
@@ -150,6 +155,11 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Set up Node.js 18
         uses: actions/setup-node@v4
