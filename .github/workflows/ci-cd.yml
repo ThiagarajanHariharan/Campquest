@@ -24,15 +24,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: services/fitness-sync-service/package.json
+
+      - name: Install pnpm
+        run: npm install -g pnpm@9
 
       - name: Install fitness-sync dependencies
-        run: npm ci
+        run: pnpm install
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
-        run: npm test -- --ci --passWithNoTests
+        run: pnpm test -- --ci --passWithNoTests
         working-directory: services/fitness-sync-service
 
       - name: Upload coverage report
@@ -69,12 +70,12 @@ jobs:
         with:
           args: --all-projects --severity-threshold=high
 
-      - name: Run npm audit
+      - name: Run pnpm audit
         run: |
-          cd services/fitness-sync-service && npm audit --audit-level=high || true
-          cd ../merchant-stall-service && npm audit --audit-level=high || true
-          cd ../geolocation-service && npm audit --audit-level=high || true
-          cd ../rewards-store-service && npm audit --audit-level=high || true
+          cd services/fitness-sync-service && pnpm audit --audit-level=high || true
+          cd ../merchant-stall-service && pnpm audit --audit-level=high || true
+          cd ../geolocation-service && pnpm audit --audit-level=high || true
+          cd ../rewards-store-service && pnpm audit --audit-level=high || true
 
   # ============================================================
   # Stage 3: Build Docker images
@@ -164,10 +165,11 @@ jobs:
 
       - name: Start services
         run: |
-          cd services/fitness-sync-service && npm ci && PORT=3001 DB_HOST=localhost node src/index.js &
-          cd services/merchant-stall-service && npm ci && PORT=3002 DB_HOST=localhost node src/index.js &
-          cd services/geolocation-service && npm ci && PORT=3003 DB_HOST=localhost node src/index.js &
-          cd services/rewards-store-service && npm ci && PORT=3004 DB_HOST=localhost node src/index.js &
+          npm install -g pnpm@9
+          cd services/fitness-sync-service && pnpm install && PORT=3001 DB_HOST=localhost node src/index.js &
+          cd services/merchant-stall-service && pnpm install && PORT=3002 DB_HOST=localhost node src/index.js &
+          cd services/geolocation-service && pnpm install && PORT=3003 DB_HOST=localhost node src/index.js &
+          cd services/rewards-store-service && pnpm install && PORT=3004 DB_HOST=localhost node src/index.js &
           sleep 10
         env:
           DB_HOST: localhost
@@ -184,11 +186,11 @@ jobs:
           echo "✅ All services healthy"
 
       - name: Install test dependencies
-        run: npm ci
+        run: pnpm install
         working-directory: integration-tests
 
       - name: Run integration tests
-        run: npm test
+        run: pnpm test
         working-directory: integration-tests
         env:
           FITNESS_URL: http://localhost:3001
