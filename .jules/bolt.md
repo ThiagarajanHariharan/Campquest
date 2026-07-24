@@ -1,0 +1,3 @@
+## 2024-05-24 - Optimizing sequential queries in microservices
+**Learning:** In the backend Express microservices, route handlers sometimes execute independent PostgreSQL queries sequentially, creating unnecessary bottlenecks.
+**Action:** Always optimize by wrapping independent queries in a `Promise.all()` block to run concurrently, ensuring validation queries (like user existence checks) are `await`ed first.
