@@ -61,7 +61,7 @@ app.get('/api/merchant/canteens', async (req, res) => {
     res.json({ canteens: result.rows, count: result.rows.length });
   } catch (err) {
     console.error('Error fetching canteens:', err);
-    res.status(500).json({ error: 'Failed to fetch canteens', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch canteens', details: 'Internal Server Error' /* secure error message */ });
   }
 });
 
@@ -84,7 +84,7 @@ app.get('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
     res.json({ canteen: canteenResult.rows[0], menu: menuResult.rows, item_count: menuResult.rows.length });
   } catch (err) {
     console.error('Error fetching menu:', err);
-    res.status(500).json({ error: 'Failed to fetch menu', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch menu', details: 'Internal Server Error' /* secure error message */ });
   }
 });
 
@@ -117,7 +117,7 @@ app.post('/api/merchant/canteen/:canteenId/menu', async (req, res) => {
     res.status(201).json({ message: 'Menu item created!', item: result.rows[0] });
   } catch (err) {
     console.error('Error creating menu item:', err);
-    res.status(500).json({ error: 'Failed to create menu item', details: err.message });
+    res.status(500).json({ error: 'Failed to create menu item', details: 'Internal Server Error' /* secure error message */ });
   }
 });
 
@@ -152,7 +152,7 @@ app.put('/api/merchant/menu/:menuItemId', async (req, res) => {
     res.json({ message: 'Menu item updated!', item: result.rows[0] });
   } catch (err) {
     console.error('Error updating menu item:', err);
-    res.status(500).json({ error: 'Failed to update menu item', details: err.message });
+    res.status(500).json({ error: 'Failed to update menu item', details: 'Internal Server Error' /* secure error message */ });
   }
 });
 
@@ -173,7 +173,7 @@ app.delete('/api/merchant/menu/:menuItemId', async (req, res) => {
     res.json({ message: 'Menu item removed from menu!', item: result.rows[0] });
   } catch (err) {
     console.error('Error deleting menu item:', err);
-    res.status(500).json({ error: 'Failed to delete menu item', details: err.message });
+    res.status(500).json({ error: 'Failed to delete menu item', details: 'Internal Server Error' /* secure error message */ });
   }
 });
 
@@ -193,7 +193,7 @@ app.get('/api/merchant/canteen/:canteenId/healthy', async (req, res) => {
     res.json({ healthy_items: result.rows, count: result.rows.length, max_calories: 600 });
   } catch (err) {
     console.error('Error fetching healthy items:', err);
-    res.status(500).json({ error: 'Failed to fetch healthy items', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch healthy items', details: 'Internal Server Error' /* secure error message */ });
   }
 });
 
@@ -215,7 +215,7 @@ app.get('/api/merchant/menu/:menuItemId', async (req, res) => {
     res.json({ item: result.rows[0] });
   } catch (err) {
     console.error('Error fetching menu item:', err);
-    res.status(500).json({ error: 'Failed to fetch menu item', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch menu item', details: 'Internal Server Error' /* secure error message */ });
   }
 });
 
