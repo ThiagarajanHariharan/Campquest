@@ -127,6 +127,12 @@ app.get('/api/fitness/user/:userId', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    /*
+      ⚡ Bolt Optimization:
+      Wrapped independent activities and stats queries in Promise.all()
+      to execute them concurrently rather than sequentially.
+      Impact: Reduces total DB query latency for this endpoint.
+    */
     const [activitiesResult, statsResult] = await Promise.all([
       pool.query(
         `SELECT * FROM fitness_activities WHERE user_id = $1 ORDER BY synced_at DESC LIMIT 20`,
