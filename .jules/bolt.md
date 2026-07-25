@@ -1,0 +1,3 @@
+## 2024-07-25 - Concurrent Database Queries in Express Microservices
+**Learning:** Sequential independent database queries were found to be a common pattern in the Express microservices route handlers (e.g., `GET /api/fitness/user/:userId`), unnecessarily compounding response times.
+**Action:** Always wrap independent asynchronous operations, such as independent PostgreSQL queries, in `Promise.all()` to execute them concurrently, while ensuring any necessary validation queries (like user existence checks) are strictly `await`ed beforehand.
