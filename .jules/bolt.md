@@ -1,0 +1,3 @@
+## 2024-08-05 - Concurrent Database Queries Optimization
+**Learning:** In the Express microservices, route handlers often execute multiple independent database queries (e.g., fetching user activities and overall stats) sequentially using `await pool.query()`, which unnecessarily blocks subsequent queries and increases overall latency.
+**Action:** Always inspect route handlers for multiple independent `await pool.query()` calls and group them together in a `Promise.all()` array to execute concurrently, ensuring any validation queries (e.g., checking if the user exists) remain isolated beforehand.
