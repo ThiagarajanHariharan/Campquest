@@ -42,7 +42,8 @@ app.get('/health', async (req, res) => {
       database: 'connected'
     });
   } catch (err) {
-    res.status(503).json({ status: 'unhealthy', service: 'rewards-store', error: err.message });
+    console.error(err);
+    res.status(503).json({ status: 'unhealthy', service: 'rewards-store', error: 'Internal Server Error' });
   }
 });
 
@@ -58,7 +59,7 @@ app.get('/api/rewards/merchandise', async (req, res) => {
     res.json({ merchandise: result.rows, count: result.rows.length });
   } catch (err) {
     console.error('Error fetching merchandise:', err);
-    res.status(500).json({ error: 'Failed to fetch merchandise', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch merchandise' });
   }
 });
 
@@ -79,7 +80,7 @@ app.get('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
     res.json({ item: result.rows[0] });
   } catch (err) {
     console.error('Error fetching merchandise item:', err);
-    res.status(500).json({ error: 'Failed to fetch merchandise', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch merchandise' });
   }
 });
 
@@ -100,7 +101,7 @@ app.get('/api/rewards/user/:userId/balance', async (req, res) => {
     res.json({ user: result.rows[0], balance: result.rows[0].quest_points });
   } catch (err) {
     console.error('Error fetching balance:', err);
-    res.status(500).json({ error: 'Failed to fetch balance', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch balance' });
   }
 });
 
@@ -122,7 +123,7 @@ app.get('/api/rewards/user/:userId/transactions', async (req, res) => {
     res.json({ transactions: result.rows, count: result.rows.length });
   } catch (err) {
     console.error('Error fetching transactions:', err);
-    res.status(500).json({ error: 'Failed to fetch transactions', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch transactions' });
   }
 });
 
@@ -223,7 +224,7 @@ app.post('/api/rewards/claim', async (req, res) => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error claiming merchandise:', err);
-    res.status(500).json({ error: 'Failed to claim merchandise', details: err.message });
+    res.status(500).json({ error: 'Failed to claim merchandise' });
   } finally {
     client.release();
   }
@@ -249,7 +250,7 @@ app.post('/api/rewards/merchandise', async (req, res) => {
     res.status(201).json({ message: 'Merchandise created!', item: result.rows[0] });
   } catch (err) {
     console.error('Error creating merchandise:', err);
-    res.status(500).json({ error: 'Failed to create merchandise', details: err.message });
+    res.status(500).json({ error: 'Failed to create merchandise' });
   }
 });
 
@@ -286,7 +287,7 @@ app.put('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
     res.json({ message: 'Merchandise updated!', item: result.rows[0] });
   } catch (err) {
     console.error('Error updating merchandise:', err);
-    res.status(500).json({ error: 'Failed to update merchandise', details: err.message });
+    res.status(500).json({ error: 'Failed to update merchandise' });
   }
 });
 
