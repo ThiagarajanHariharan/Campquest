@@ -64,7 +64,8 @@ app.get('/health', async (req, res) => {
       database: 'connected'
     });
   } catch (err) {
-    res.status(503).json({ status: 'unhealthy', service: 'geolocation', error: err.message });
+    console.error(err);
+    res.status(503).json({ status: 'unhealthy', service: 'geolocation', error: 'Internal Server Error' });
   }
 });
 
@@ -143,7 +144,7 @@ app.post('/api/geo/check-location', async (req, res) => {
     });
   } catch (err) {
     console.error('Error checking location:', err);
-    res.status(500).json({ error: 'Failed to check location', details: err.message });
+    res.status(500).json({ error: 'Failed to check location' });
   }
 });
 
@@ -167,7 +168,7 @@ app.get('/api/geo/canteen/:canteenId/menu', async (req, res) => {
     res.json({ canteen: canteenResult.rows[0], menu: menuResult.rows, item_count: menuResult.rows.length });
   } catch (err) {
     console.error('Error fetching canteen menu:', err);
-    res.status(500).json({ error: 'Failed to fetch menu', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch menu' });
   }
 });
 
@@ -194,7 +195,7 @@ app.get('/api/geo/user/:userId/current-location', async (req, res) => {
     res.json({ location: result.rows[0] });
   } catch (err) {
     console.error('Error fetching user location:', err);
-    res.status(500).json({ error: 'Failed to fetch user location', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch user location' });
   }
 });
 
@@ -217,7 +218,7 @@ app.get('/api/geo/canteens/all', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching all canteens:', err);
-    res.status(500).json({ error: 'Failed to fetch canteens', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch canteens' });
   }
 });
 
