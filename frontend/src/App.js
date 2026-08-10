@@ -171,7 +171,7 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
       <div className="drawer">
         <div className="drawer-header">
           <h3>⚙️ Settings</h3>
-          <button className="icon-btn" onClick={onClose}>✕</button>
+          <button className="icon-btn" aria-label="Close settings" onClick={onClose}>✕</button>
         </div>
         <div className="drawer-avatar">
           <div className="avatar-circle">{user.name[0].toUpperCase()}</div>
@@ -236,7 +236,7 @@ function StallOwnerApp({ user, onLogout }) {
       <header className="header" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
         <div className="header-content">
           <div className="logo"><span>🏪</span><h1>Stall Dashboard</h1></div>
-          <button className="icon-btn" onClick={onLogout}>🚪</button>
+          <button className="icon-btn" aria-label="Log out" onClick={onLogout}>🚪</button>
         </div>
       </header>
       <main className="main" style={{ textAlign: 'center', paddingTop: 60 }}>
@@ -282,12 +282,12 @@ function LoginScreen({ onLogin }) {
         <p className="login-sub">Your campus fitness companion</p>
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Username</label>
-            <input placeholder="Enter your username" value={username} onChange={e => { setUsername(e.target.value); setError(''); }}/>
+            <label htmlFor="username">Username</label>
+            <input id="username" placeholder="Enter your username" value={username} onChange={e => { setUsername(e.target.value); setError(''); }}/>
           </div>
           <div className="form-group">
-            <label>Password</label>
-            <input type="password" placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }}/>
+            <label htmlFor="password">Password</label>
+            <input id="password" type="password" placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }}/>
           </div>
           {error && <p className="login-error">{error}</p>}
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: 8 }}>
@@ -407,13 +407,13 @@ function StudentApp({ user, onLogout }) {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <button className="icon-btn" onClick={() => setShowSettings(true)}>☰</button>
+          <button className="icon-btn" aria-label="Open menu" onClick={() => setShowSettings(true)}>☰</button>
           <div className="header-center">
             <span className="greeting">Greetings, {user.name}! 👋</span>
           </div>
           <div className="header-right">
             <span className="points-badge">⭐ {questPoints}</span>
-            <button className="icon-btn" onClick={() => setShowSettings(true)}>⚙️</button>
+            <button className="icon-btn" aria-label="Settings" onClick={() => setShowSettings(true)}>⚙️</button>
           </div>
         </div>
       </header>
