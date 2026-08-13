@@ -234,6 +234,11 @@ app.post('/api/rewards/claim', async (req, res) => {
 // Add new merchandise (admin)
 // ============================================================
 app.post('/api/rewards/merchandise', async (req, res) => {
+  const adminToken = req.headers['x-admin-token'];
+  if (!adminToken || adminToken !== (process.env.ADMIN_TOKEN || 'dev_admin_secret')) {
+    return res.status(401).json({ error: 'Unauthorized: Admin access required' });
+  }
+
   const { name, description, cost_in_points, stock_quantity, category } = req.body;
 
   if (!name || cost_in_points === undefined || stock_quantity === undefined) {
@@ -258,6 +263,11 @@ app.post('/api/rewards/merchandise', async (req, res) => {
 // Update merchandise details
 // ============================================================
 app.put('/api/rewards/merchandise/:merchandiseId', async (req, res) => {
+  const adminToken = req.headers['x-admin-token'];
+  if (!adminToken || adminToken !== (process.env.ADMIN_TOKEN || 'dev_admin_secret')) {
+    return res.status(401).json({ error: 'Unauthorized: Admin access required' });
+  }
+
   const { merchandiseId } = req.params;
   const { name, description, cost_in_points, stock_quantity, is_available, category } = req.body;
 
