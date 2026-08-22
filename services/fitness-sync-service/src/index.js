@@ -210,6 +210,9 @@ app.post('/api/fitness/user', async (req, res) => {
 app.get('/api/fitness/activities', async (req, res) => {
   const { user_id, limit = 50 } = req.query;
   try {
+    const parsedLimit = parseInt(limit, 10);
+    const validLimit = isNaN(parsedLimit) ? 50 : parsedLimit;
+
     let query = `SELECT fa.*, u.username FROM fitness_activities fa
                  JOIN users u ON fa.user_id = u.id`;
     const params = [];
@@ -218,7 +221,7 @@ app.get('/api/fitness/activities', async (req, res) => {
       params.push(user_id);
     }
     query += ' ORDER BY fa.synced_at DESC LIMIT $' + (params.length + 1);
-    params.push(limit);
+    params.push(validLimit);
 
     const result = await pool.query(query, params);
     res.json({ activities: result.rows, count: result.rows.length });
