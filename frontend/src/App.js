@@ -35,7 +35,8 @@ async function api(url, opts = {}) {
 // ═══════════════════════════════════════════════════════════════
 // SVG Calorie Ring
 // ═══════════════════════════════════════════════════════════════
-function CalorieRing({ ingested, burned, goal }) {
+// React.memo prevents unnecessary SVG recalculations when parent state updates
+const CalorieRing = React.memo(function CalorieRing({ ingested, burned, goal }) {
   const R  = 78;
   const C  = 2 * Math.PI * R;
   const inPct  = Math.min(ingested / goal, 1);
@@ -78,7 +79,7 @@ function CalorieRing({ ingested, burned, goal }) {
       </div>
     </div>
   );
-}
+});
 
 // ═══════════════════════════════════════════════════════════════
 // Meal Log Modal
