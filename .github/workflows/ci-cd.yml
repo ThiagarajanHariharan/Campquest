@@ -35,7 +35,7 @@ jobs:
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
-        run: pnpm test -- --ci --passWithNoTests --forceExit
+        run: pnpm test --passWithNoTests --forceExit
         working-directory: services/fitness-sync-service
 
       - name: Upload coverage report
@@ -194,7 +194,7 @@ jobs:
         working-directory: integration-tests
 
       - name: Run integration tests
-        run: pnpm test -- --passWithNoTests --forceExit
+        run: pnpm test --passWithNoTests --forceExit
         working-directory: integration-tests
         env:
           FITNESS_URL: http://localhost:3001
