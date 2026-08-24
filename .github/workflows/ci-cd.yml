@@ -24,15 +24,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: 'pnpm'
           cache-dependency-path: services/fitness-sync-service/package.json
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install fitness-sync dependencies
-        run: npm ci
+        run: pnpm install
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
-        run: npm test -- --ci --passWithNoTests
+        run: pnpm test -- --ci --passWithNoTests --forceExit
         working-directory: services/fitness-sync-service
 
       - name: Upload coverage report
@@ -156,6 +159,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Initialize database
         run: |
           PGPASSWORD=campusquest_pass psql -h localhost -U campusquest_user -d campusquest_db -f init.sql
@@ -164,10 +170,10 @@ jobs:
 
       - name: Start services
         run: |
-          cd services/fitness-sync-service && npm ci && PORT=3001 DB_HOST=localhost node src/index.js &
-          cd services/merchant-stall-service && npm ci && PORT=3002 DB_HOST=localhost node src/index.js &
-          cd services/geolocation-service && npm ci && PORT=3003 DB_HOST=localhost node src/index.js &
-          cd services/rewards-store-service && npm ci && PORT=3004 DB_HOST=localhost node src/index.js &
+          cd services/fitness-sync-service && pnpm install && PORT=3001 DB_HOST=localhost node src/index.js &
+          cd services/merchant-stall-service && pnpm install && PORT=3002 DB_HOST=localhost node src/index.js &
+          cd services/geolocation-service && pnpm install && PORT=3003 DB_HOST=localhost node src/index.js &
+          cd services/rewards-store-service && pnpm install && PORT=3004 DB_HOST=localhost node src/index.js &
           sleep 10
         env:
           DB_HOST: localhost
@@ -183,12 +189,15 @@ jobs:
           curl -f http://localhost:3004/health || exit 1
           echo "✅ All services healthy"
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install test dependencies
-        run: npm ci
+        run: pnpm install
         working-directory: integration-tests
 
       - name: Run integration tests
-        run: npm test
+        run: pnpm test -- --forceExit
         working-directory: integration-tests
         env:
           FITNESS_URL: http://localhost:3001
