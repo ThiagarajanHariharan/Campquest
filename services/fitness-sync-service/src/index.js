@@ -209,6 +209,12 @@ app.post('/api/fitness/user', async (req, res) => {
 // ============================================================
 app.get('/api/fitness/activities', async (req, res) => {
   const { user_id, limit = 50 } = req.query;
+
+  const parsedLimit = parseInt(limit, 10);
+  if (isNaN(parsedLimit) || parsedLimit <= 0) {
+    return res.status(400).json({ error: 'Invalid limit parameter' });
+  }
+
   try {
     let query = `SELECT fa.*, u.username FROM fitness_activities fa
                  JOIN users u ON fa.user_id = u.id`;
@@ -218,7 +224,7 @@ app.get('/api/fitness/activities', async (req, res) => {
       params.push(user_id);
     }
     query += ' ORDER BY fa.synced_at DESC LIMIT $' + (params.length + 1);
-    params.push(limit);
+    params.push(parsedLimit);
 
     const result = await pool.query(query, params);
     res.json({ activities: result.rows, count: result.rows.length });
