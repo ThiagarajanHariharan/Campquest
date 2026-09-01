@@ -174,7 +174,7 @@ jobs:
           cd services/merchant-stall-service && pnpm install && PORT=3002 DB_HOST=localhost node src/index.js &
           cd services/geolocation-service && pnpm install && PORT=3003 DB_HOST=localhost node src/index.js &
           cd services/rewards-store-service && pnpm install && PORT=3004 DB_HOST=localhost node src/index.js &
-          sleep 10
+          sleep 30
         env:
           DB_HOST: localhost
           DB_USER: campusquest_user

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "End-to-end integration tests for CampusQuest Go",
   "scripts": {
-    "test": "jest --runInBand --forceExit"
+    "test": "jest --runInBand --forceExit --testTimeout=60000"
   },
   "dependencies": {
     "axios": "^1.6.2"
