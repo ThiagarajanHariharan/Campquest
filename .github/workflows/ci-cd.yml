@@ -34,7 +34,7 @@ jobs:
         working-directory: services/fitness-sync-service
 
       - name: Run fitness-sync unit tests
-        run: pnpm test -- --ci --passWithNoTests
+        run: pnpm test --ci --passWithNoTests --forceExit
         working-directory: services/fitness-sync-service
 
       - name: Upload coverage report
