@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install fitness-sync dependencies
         run: pnpm install
         working-directory: services/fitness-sync-service
@@ -153,6 +156,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Initialize database
         run: |
