@@ -1,0 +1,3 @@
+## 2026-09-17 - Icon Button Accessibility & Keyboard Navigation
+**Learning:** Icon-only buttons relying purely on emojis require explicit `aria-label` attributes to be perceivable by screen readers. Furthermore, standard button elements often lack clear focus indicators for keyboard navigation in custom styled design systems.
+**Action:** When adding new icon-only interactive elements, ensure an `aria-label` is always provided. Additionally, use the `:focus-visible` pseudo-class (e.g. `outline: 2px solid var(--primary)`) to provide clear visual focus indicators without penalizing mouse users with persistent focus rings.
