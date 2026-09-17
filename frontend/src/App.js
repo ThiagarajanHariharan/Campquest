@@ -335,13 +335,18 @@ function StudentApp({ user, onLogout }) {
 
   // Load fitness data
   useEffect(() => {
-    api(`${FITNESS_URL}/api/fitness/user/${user.id}`).then(d => {
-      if (d.user) { setUserData(d); }
-      if (d.stats?.total_calories) setBurned(parseInt(d.stats.total_calories) || 0);
+    Promise.all([
+      api(`${FITNESS_URL}/api/fitness/user/${user.id}`),
+      api(`${FITNESS_URL}/api/fitness/leaderboard`),
+      api(`${MERCHANT_URL}/api/merchant/canteens`),
+      api(`${REWARDS_URL}/api/rewards/merchandise`)
+    ]).then(([userDataResult, leaderboardResult, canteensResult, merchandiseResult]) => {
+      if (userDataResult.user) { setUserData(userDataResult); }
+      if (userDataResult.stats?.total_calories) setBurned(parseInt(userDataResult.stats.total_calories) || 0);
+      if (leaderboardResult.leaderboard) setLeaderboard(leaderboardResult.leaderboard);
+      if (canteensResult.canteens) setCanteens(canteensResult.canteens);
+      if (merchandiseResult.merchandise) setMerchandise(merchandiseResult.merchandise);
     });
-    api(`${FITNESS_URL}/api/fitness/leaderboard`).then(d => { if (d.leaderboard) setLeaderboard(d.leaderboard); });
-    api(`${MERCHANT_URL}/api/merchant/canteens`).then(d => { if (d.canteens) setCanteens(d.canteens); });
-    api(`${REWARDS_URL}/api/rewards/merchandise`).then(d => { if (d.merchandise) setMerchandise(d.merchandise); });
   }, [user.id]);
 
   // Theme effect
