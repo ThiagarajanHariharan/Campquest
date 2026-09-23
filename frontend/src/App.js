@@ -92,12 +92,12 @@ function MealModal({ meal, onClose, onLog }) {
         <h3>{meal.emoji} {meal.label}</h3>
         <p className="modal-sub">What did you eat? Log your calories below.</p>
         <div className="form-group">
-          <label>Description</label>
-          <input placeholder="e.g. Chicken rice, Milo" value={desc} onChange={e => setDesc(e.target.value)}/>
+          <label htmlFor="meal-desc">Description</label>
+          <input id="meal-desc" placeholder="e.g. Chicken rice, Milo" value={desc} onChange={e => setDesc(e.target.value)}/>
         </div>
         <div className="form-group">
-          <label>Calories (kcal)</label>
-          <input type="number" placeholder="e.g. 600" value={cal} onChange={e => setCal(e.target.value)}/>
+          <label htmlFor="meal-cal">Calories (kcal)</label>
+          <input id="meal-cal" type="number" placeholder="e.g. 600" value={cal} onChange={e => setCal(e.target.value)}/>
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
@@ -133,8 +133,8 @@ function FitnessModal({ userId, onClose, onSync }) {
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <h3>🏃 Log Activity</h3>
         <div className="form-group">
-          <label>Activity</label>
-          <select value={form.activity_type} onChange={e => setForm({...form, activity_type: e.target.value})}>
+          <label htmlFor="activity-type">Activity</label>
+          <select id="activity-type" value={form.activity_type} onChange={e => setForm({...form, activity_type: e.target.value})}>
             <option value="running">🏃 Running</option>
             <option value="walking">🚶 Walking</option>
             <option value="cycling">🚴 Cycling</option>
@@ -142,8 +142,8 @@ function FitnessModal({ userId, onClose, onSync }) {
           </select>
         </div>
         <div className="form-group">
-          <label>Distance (miles)</label>
-          <input type="number" step="0.1" min="0.1" placeholder="e.g. 3.5"
+          <label htmlFor="distance-miles">Distance (miles)</label>
+          <input id="distance-miles" type="number" step="0.1" min="0.1" placeholder="e.g. 3.5"
             value={form.distance_miles} onChange={e => setForm({...form, distance_miles: e.target.value})}/>
         </div>
         {pts > 0 && (
@@ -171,7 +171,7 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
       <div className="drawer">
         <div className="drawer-header">
           <h3>⚙️ Settings</h3>
-          <button className="icon-btn" onClick={onClose}>✕</button>
+          <button className="icon-btn" aria-label="Close settings" onClick={onClose}>✕</button>
         </div>
         <div className="drawer-avatar">
           <div className="avatar-circle">{user.name[0].toUpperCase()}</div>
@@ -195,9 +195,9 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
           <label className="drawer-label">🎨 Theme</label>
           <div className="toggle-row">
             <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-            <div className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onThemeToggle}>
+            <button role="switch" aria-checked={theme === 'dark'} aria-label="Toggle dark mode" className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={onThemeToggle}>
               <div className="toggle-knob"/>
-            </div>
+            </button>
           </div>
         </div>
         {/* Notifications */}
@@ -205,9 +205,9 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
           <label className="drawer-label">🔔 Notifications</label>
           <div className="toggle-row">
             <span>{notifications ? 'Enabled' : 'Disabled'}</span>
-            <div className={`toggle ${notifications ? 'on' : ''}`} onClick={onNotifToggle}>
+            <button role="switch" aria-checked={notifications} aria-label="Toggle notifications" className={`toggle ${notifications ? 'on' : ''}`} onClick={onNotifToggle}>
               <div className="toggle-knob"/>
-            </div>
+            </button>
           </div>
         </div>
         {/* Fitness API */}
@@ -220,7 +220,7 @@ function SettingsDrawer({ user, calorieGoal, onGoalChange, theme, onThemeToggle,
           <p className="drawer-hint">Port 3001 · Activities synced automatically</p>
         </div>
         <div style={{ marginTop: 'auto', padding: '16px' }}>
-          <button className="btn btn-logout" onClick={onLogout}>🚪 Log Out</button>
+          <button className="btn btn-logout" aria-label="Log out" onClick={onLogout}>🚪 Log Out</button>
         </div>
       </div>
     </>
@@ -236,7 +236,7 @@ function StallOwnerApp({ user, onLogout }) {
       <header className="header" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
         <div className="header-content">
           <div className="logo"><span>🏪</span><h1>Stall Dashboard</h1></div>
-          <button className="icon-btn" onClick={onLogout}>🚪</button>
+          <button className="icon-btn" aria-label="Log out" onClick={onLogout}>🚪</button>
         </div>
       </header>
       <main className="main" style={{ textAlign: 'center', paddingTop: 60 }}>
@@ -282,12 +282,12 @@ function LoginScreen({ onLogin }) {
         <p className="login-sub">Your campus fitness companion</p>
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Username</label>
-            <input placeholder="Enter your username" value={username} onChange={e => { setUsername(e.target.value); setError(''); }}/>
+            <label htmlFor="username">Username</label>
+            <input id="username" placeholder="Enter your username" value={username} onChange={e => { setUsername(e.target.value); setError(''); }}/>
           </div>
           <div className="form-group">
-            <label>Password</label>
-            <input type="password" placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }}/>
+            <label htmlFor="password">Password</label>
+            <input id="password" type="password" placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }}/>
           </div>
           {error && <p className="login-error">{error}</p>}
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: 8 }}>
@@ -407,13 +407,13 @@ function StudentApp({ user, onLogout }) {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <button className="icon-btn" onClick={() => setShowSettings(true)}>☰</button>
+          <button className="icon-btn" aria-label="Open menu" onClick={() => setShowSettings(true)}>☰</button>
           <div className="header-center">
             <span className="greeting">Greetings, {user.name}! 👋</span>
           </div>
           <div className="header-right">
             <span className="points-badge">⭐ {questPoints}</span>
-            <button className="icon-btn" onClick={() => setShowSettings(true)}>⚙️</button>
+            <button className="icon-btn" aria-label="Open settings" onClick={() => setShowSettings(true)}>⚙️</button>
           </div>
         </div>
       </header>
