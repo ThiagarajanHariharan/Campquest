@@ -45,8 +45,7 @@ app.get('/health', async (req, res) => {
   } catch (err) {
     res.status(503).json({
       status: 'unhealthy',
-      service: 'fitness-sync',
-      error: err.message
+      service: 'fitness-sync'
     });
   }
 });
@@ -105,7 +104,7 @@ app.post('/api/fitness/sync', async (req, res) => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error syncing fitness activity:', err);
-    res.status(500).json({ error: 'Failed to sync fitness activity', details: err.message });
+    res.status(500).json({ error: 'Failed to sync fitness activity' });
   } finally {
     client.release();
   }
@@ -149,7 +148,7 @@ app.get('/api/fitness/user/:userId', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching user data:', err);
-    res.status(500).json({ error: 'Failed to fetch user data', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch user data' });
   }
 });
 
@@ -173,7 +172,7 @@ app.get('/api/fitness/leaderboard', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching leaderboard:', err);
-    res.status(500).json({ error: 'Failed to fetch leaderboard', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
   }
 });
 
@@ -199,7 +198,7 @@ app.post('/api/fitness/user', async (req, res) => {
       return res.status(409).json({ error: 'Username or email already exists' });
     }
     console.error('Error creating user:', err);
-    res.status(500).json({ error: 'Failed to create user', details: err.message });
+    res.status(500).json({ error: 'Failed to create user' });
   }
 });
 
@@ -224,7 +223,7 @@ app.get('/api/fitness/activities', async (req, res) => {
     res.json({ activities: result.rows, count: result.rows.length });
   } catch (err) {
     console.error('Error fetching activities:', err);
-    res.status(500).json({ error: 'Failed to fetch activities', details: err.message });
+    res.status(500).json({ error: 'Failed to fetch activities' });
   }
 });
 
