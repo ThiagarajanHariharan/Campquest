@@ -214,6 +214,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 .btn-secondary { background: var(--surface-highest); color: var(--primary); border: none; }
 .btn-secondary:hover { border-color: var(--primary); }
+.btn:focus-visible, .icon-btn:focus-visible, .nav-btn:focus-visible, .meal-btn:focus-visible, .activity-btn:focus-visible, .ql-btn:focus-visible { outline: 2px solid var(--primary-container); outline-offset: 2px; }
 .icon-btn { background: rgba(255,255,255,0.12); border: none; color: white; border-radius: 8px; padding: 7px 10px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
 .icon-btn:hover { background: rgba(255,255,255,0.22); }
 
