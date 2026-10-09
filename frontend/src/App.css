@@ -256,3 +256,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   .stats-grid { gap: 8px; }
   .stat-val { font-size: 1.3rem; }
 }
+
+/* Added focus styles for accessibility */
+.btn:focus-visible, .icon-btn:focus-visible, .nav-btn:focus-visible, .meal-btn:focus-visible, .activity-btn:focus-visible, .ql-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
