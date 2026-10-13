@@ -209,6 +209,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 /* ── Buttons ── */
 .btn { padding: 12px 20px; border-radius: 9999px; border: none; cursor: pointer; font-weight: 700; font-size: 0.95rem; font-family: inherit; transition: all 0.2s; width: 100%; }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .btn-primary { background: var(--primary-gradient); color: var(--on-primary); }
 .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(160,97,255,0.45); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
@@ -216,6 +217,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .btn-secondary:hover { border-color: var(--primary); }
 .icon-btn { background: rgba(255,255,255,0.12); border: none; color: white; border-radius: 8px; padding: 7px 10px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
 .icon-btn:hover { background: rgba(255,255,255,0.22); }
+.icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* ── Login ── */
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--bg); }
