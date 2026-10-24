@@ -13,7 +13,7 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
   database: process.env.DB_NAME || 'campusquest_db',
   user: process.env.DB_USER || 'campusquest_user',
-  password: process.env.DB_PASSWORD || 'campusquest_pass',
+  password: process.env.DB_PASSWORD,
   max: 10,
   idleTimeoutMillis: 30000,
 });
