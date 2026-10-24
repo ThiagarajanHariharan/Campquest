@@ -1,0 +1,3 @@
+## 2024-10-24 - Parallelizing Independent Queries in Backend Services
+**Learning:** In this codebase's architecture, `Promise.all` is highly recommended for optimizing backend microservices by parallelizing independent database queries (e.g., in Express route handlers) to reduce endpoint latency. However, it should be strictly avoided in the React frontend, as it degrades perceived performance by preventing progressive rendering and blocking state updates until the slowest request resolves.
+**Action:** When optimizing backend routes, always look for sequential `await` calls that don't depend on each other and combine them into a `Promise.all` block. When reviewing frontend code, avoid `Promise.all` for independent API calls.
