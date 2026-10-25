@@ -1,0 +1,4 @@
+## 2026-10-25 - Add input validation for coordinates
+**Vulnerability:** Found endpoints accepting user input to construct parameterized SQL queries, which is mostly safe from classic SQL injection, but inputs are largely missing type/length validations. Found hardcoded secrets in `DEMO_USERS` in `frontend/src/App.js`. Found missing robust password validation on user creation in `services/fitness-sync-service/src/index.js`.
+**Learning:** This repo utilizes a hardcoded `campusquest_pass` as a default for missing env vars in database connection configurations across all services, which is insecure, especially for a production service. Passwords are also hardcoded in the frontend.
+**Prevention:** Remove fallback hardcoded passwords from the database configuration in the services and enforce the usage of environment variables.
