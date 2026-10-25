@@ -1,0 +1,3 @@
+## 2024-10-25 - Parallelize database queries
+**Learning:** Promise.all is restricted for independent API calls in the React frontend to preserve progressive rendering, but it is a recommended pattern for optimizing backend microservices in this repository by parallelizing independent database queries (e.g., in Express route handlers) to reduce endpoint latency.
+**Action:** When working on backend Express routes that fetch multiple independent pieces of data, always use Promise.all to run the database queries concurrently instead of awaiting them sequentially.
