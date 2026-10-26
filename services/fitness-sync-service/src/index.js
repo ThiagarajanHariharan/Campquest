@@ -127,20 +127,25 @@ app.get('/api/fitness/user/:userId', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const activitiesResult = await pool.query(
-      `SELECT * FROM fitness_activities WHERE user_id = $1 ORDER BY synced_at DESC LIMIT 20`,
-      [userId]
-    );
-
-    const statsResult = await pool.query(
-      `SELECT
-         COUNT(*) AS total_activities,
-         COALESCE(SUM(distance_miles), 0) AS total_miles,
-         COALESCE(SUM(calories_burned), 0) AS total_calories,
-         COALESCE(SUM(points_earned), 0) AS total_points_earned
-       FROM fitness_activities WHERE user_id = $1`,
-      [userId]
-    );
+    // ⚡ Bolt Performance Optimization:
+    // What: Parallelized independent database queries using Promise.all
+    // Why: Activities and stats queries are independent and can be executed concurrently
+    // Impact: Reduces endpoint latency by saving one sequential database round-trip
+    const [activitiesResult, statsResult] = await Promise.all([
+      pool.query(
+        `SELECT * FROM fitness_activities WHERE user_id = $1 ORDER BY synced_at DESC LIMIT 20`,
+        [userId]
+      ),
+      pool.query(
+        `SELECT
+           COUNT(*) AS total_activities,
+           COALESCE(SUM(distance_miles), 0) AS total_miles,
+           COALESCE(SUM(calories_burned), 0) AS total_calories,
+           COALESCE(SUM(points_earned), 0) AS total_points_earned
+         FROM fitness_activities WHERE user_id = $1`,
+        [userId]
+      )
+    ]);
 
     res.json({
       user: userResult.rows[0],
